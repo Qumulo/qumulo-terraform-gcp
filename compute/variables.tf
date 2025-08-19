@@ -167,7 +167,7 @@ variable "q_cluster_name" {
 variable "q_cluster_version" {
   description = "Qumulo cluster software version"
   type        = string
-  default     = "7.5.0"
+  default     = "7.6.0"
   validation {
     condition     = can(regex("^((4\\.[2-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?)|([5-9][0-9]?\\.[0-9]\\.[0-9][a-zA-Z0-9]?\\.?[0-9]?[a-zA-Z0-9]?))$", var.q_cluster_version))
     error_message = "The q_cluster_version 7.6.0 or greater. Examples: 7.6.0.1, 7.6.1, 7.7.0, etc."

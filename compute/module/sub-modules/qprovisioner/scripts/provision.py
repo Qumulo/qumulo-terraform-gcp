@@ -598,7 +598,7 @@ def validate_qfsd_version(qfsd_version: str, firestore: FirestoreManager) -> Non
     if check_version == 2:  # qfsd_version > 7.6.0
         logging.info("Qumulo Core >= 7.6.0")
     else:
-        error_msg = "Qumulo Core version >= 7.6.0 is required. If this is a new deployment destroy it and redeploy with >= 7.5.0."
+        error_msg = "Qumulo Core version >= 7.6.0 is required. If this is a new deployment destroy it and redeploy with >= 7.6.0."
         logging.error(error_msg)
         firestore.update_status(error_msg)
         raise ProvisioningError(error_msg)
