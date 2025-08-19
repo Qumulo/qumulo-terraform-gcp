@@ -1,0 +1,48 @@
+# CNQ Firestore Utilities - Dependencies
+#
+# This file documents the dependencies for the Python Firestore utilities.
+# IMPORTANT: This implementation uses ONLY Python standard library modules.
+#
+# Why zero external dependencies?
+# - Simplifies VM deployment (no pip install required)
+# - Reduces dependency conflicts and version issues
+# - Works reliably across different Python environments
+# - Faster startup times and smaller footprint
+
+# Standard library modules used (no installation needed):
+# - json                    # JSON parsing and generation
+# - subprocess              # Execute gcloud commands
+# - sys                     # System-specific parameters and functions
+# - urllib.request          # HTTP requests to Firestore REST API
+# - urllib.parse            # URL parsing utilities
+# - urllib.error            # URL error handling
+# - datetime                # Date and time handling
+# - time                    # Time-related functions
+# - logging                 # Error/debug logging
+
+# External dependencies that were AVOIDED:
+# The following packages would normally be used for Firestore operations,
+# but we intentionally avoid them to maintain zero-dependency design:
+
+# Cloud SDK and Auth:
+# google-auth>=2.0.0          # Not needed - we use gcloud CLI for auth
+# google-auth-oauthlib        # Not needed - we use gcloud CLI for auth
+# google-auth-httplib2        # Not needed - we use gcloud CLI for auth
+
+# HTTP and Networking:
+# requests>=2.28.0           # Not needed - we use urllib.request
+# httplib2                   # Not needed - we use urllib.request
+
+# Google Cloud Libraries:
+# google-cloud-firestore     # Not needed - we use REST API directly
+# google-cloud-core          # Not needed - we use REST API directly
+# googleapis-common-protos   # Not needed - we use REST API directly
+
+# Data Processing:
+# protobuf>=3.19.0           # Not needed - we use JSON over REST API
+# grpcio                     # Not needed - we use HTTP/REST not gRPC
+
+# Optional enhancements (also avoided):
+# retry>=0.9.2               # We implement simple retry logic manually
+# tenacity                   # We implement simple retry logic manually
+# cachetools                 # No caching needed for this use case
