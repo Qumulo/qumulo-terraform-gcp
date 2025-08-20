@@ -2,10 +2,6 @@
 
 <a target="_blank" href="https://qumulo.com/"><img src="./.config/images/qumulo-scale-anywhere-logo.webp" style="width:150px;height:53px;"></a>
 
-# NOT FOR PRODUCTION USE
-
----
-
 ## Terraform Documentation
 
 > ℹ️ **Note:** This repository uses documentation generated with Terraform-Docs.  
@@ -26,10 +22,12 @@
 | <a name="input_check_provisioner_shutdown"></a> [check\_provisioner\_shutdown](#input\_check\_provisioner\_shutdown) | Executes a local-exec script on the Terraform machine to check if the provisioner instance shutdown which indicates a successful cluster deployment. | `bool` | `true` | no |
 | <a name="input_deploy_provisioner"></a> [deploy\_provisioner](#input\_deploy\_provisioner) | WARNING: This variable can be set to false in development environment only. Without provisioner deployed,<br/>    node adds, node removes, cluster replace, and bucket additions are not supported in production environments.<br/>    Terraform automation of these operations only works with the provisioner.<br/>    This variable determines whether the provisioner should be deployed." | `bool` | `true` | no |
 | <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | Name for this Terraform deployment.  This name plus 7 random alphanumeric digits will be used for all resource names where appropriate. | `string` | n/a | yes |
-| <a name="input_dev_environment"></a> [dev\_environment](#input\_dev\_environment) | Enables the use of persistent\_storage\_output. NOT recommended for production | `bool` | `false` | no |
+| <a name="input_dev_environment"></a> [dev\_environment](#input\_dev\_environment) | Disables some checks and restrictions. Leaves the provisioner running after the cluster is deployed. NOT recommended for production | `bool` | `false` | no |
 | <a name="input_gce_image_name"></a> [gce\_image\_name](#input\_gce\_image\_name) | GCE Image Name | `string` | n/a | yes |
 | <a name="input_gce_ssh_public_key_path"></a> [gce\_ssh\_public\_key\_path](#input\_gce\_ssh\_public\_key\_path) | OPTIONAL: The local path to a file containing the public key which should be authorized to ssh into the Qumulo nodes | `string` | `null` | no |
+| <a name="input_gcp_cluster_custom_role"></a> [gcp\_cluster\_custom\_role](#input\_gcp\_cluster\_custom\_role) | OPTIONAL: Fully-qualified custom role name to use for cluster instances (e.g., projects/PROJECT\_ID/roles/ROLE\_ID). If set, the module will NOT create a custom role and will bind this role instead. | `string` | `null` | no |
 | <a name="input_gcp_project"></a> [gcp\_project](#input\_gcp\_project) | GCP project | `string` | n/a | yes |
+| <a name="input_gcp_provisioner_custom_role"></a> [gcp\_provisioner\_custom\_role](#input\_gcp\_provisioner\_custom\_role) | OPTIONAL: Fully-qualified custom role name to use for the provisioner instance (e.g., projects/PROJECT\_ID/roles/ROLE\_ID). If set, the module will NOT create a custom role and will bind this role instead. | `string` | `null` | no |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | GCP region | `string` | n/a | yes |
 | <a name="input_gcp_subnet_name"></a> [gcp\_subnet\_name](#input\_gcp\_subnet\_name) | GCP private subnet name | `string` | n/a | yes |
 | <a name="input_gcp_vpc_name"></a> [gcp\_vpc\_name](#input\_gcp\_vpc\_name) | GCP VPC name | `string` | n/a | yes |
@@ -68,6 +66,7 @@
 | <a name="output_cluster_provisioned"></a> [cluster\_provisioned](#output\_cluster\_provisioned) | If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure |
 | <a name="output_deployment_unique_name"></a> [deployment\_unique\_name](#output\_deployment\_unique\_name) | The unique name for this Cloud Native Qumulo deployment |
 | <a name="output_persistent_storage_bucket_names"></a> [persistent\_storage\_bucket\_names](#output\_persistent\_storage\_bucket\_names) | The GCS bucket names the cluster uses for persistent storage |
+| <a name="output_provisioner"></a> [provisioner](#output\_provisioner) | Provisioner instance |
 | <a name="output_qumulo_floating_ips"></a> [qumulo\_floating\_ips](#output\_qumulo\_floating\_ips) | Qumulo floating IPs for IP failover & load distribution.  Use these IPs for the A-records in your DNS. |
 | <a name="output_qumulo_nodes"></a> [qumulo\_nodes](#output\_qumulo\_nodes) | Properties of the nodes in the Qumulo cluster |
 | <a name="output_qumulo_primary_ips"></a> [qumulo\_primary\_ips](#output\_qumulo\_primary\_ips) | Qumulo primary IPs |

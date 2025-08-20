@@ -2,10 +2,6 @@
 
 <a target="_blank" href="https://qumulo.com/"><img src="./.config/images/qumulo-scale-anywhere-logo.webp" style="width:150px;height:53px;"></a>
 
-# NOT FOR PRODUCTION USE
-
----
-
 ## Terraform Documentation
 
 > ℹ️ **Note:** This repository uses documentation generated with Terraform-Docs.  
@@ -23,7 +19,9 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_bucket_count_override"></a> [bucket\_count\_override](#input\_bucket\_count\_override) | The number of buckets to deploy. If unset, the number of buckets is derived from the soft\_capacity\_limit variable. Requires dev\_environment=true. | `number` | `null` | no |
 | <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | Name for this Terraform deployment.  This name plus 11 random alphanumeric characters will be used for all resource names where appropriate. | `string` | n/a | yes |
+| <a name="input_dev_environment"></a> [dev\_environment](#input\_dev\_environment) | Disables some checks and restrictions. Leaves the provisioner running after the cluster is deployed. NOT recommended for production | `bool` | `false` | no |
 | <a name="input_gcp_project"></a> [gcp\_project](#input\_gcp\_project) | GCP project | `string` | n/a | yes |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | GCP region | `string` | n/a | yes |
 | <a name="input_labels"></a> [labels](#input\_labels) | OPTIONAL: Additional global labels | `map(string)` | `null` | no |

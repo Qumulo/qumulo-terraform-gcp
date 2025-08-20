@@ -47,5 +47,5 @@ resource "google_secret_manager_secret" "compute_secret" {
 resource "google_secret_manager_secret_version" "password" {
   secret = google_secret_manager_secret.compute_secret.id
 
-  secret_data_wo = var.cluster_admin_password
+  secret_data = var.cluster_admin_password
 }
