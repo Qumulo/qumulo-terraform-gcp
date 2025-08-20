@@ -34,6 +34,7 @@ variable "bucket_count_override" {
   description = "The number of buckets to deploy. If unset, the number of buckets is derived from the soft_capacity_limit variable. Requires dev_environment=true."
   type        = number
   nullable    = true
+  default     = null
   validation {
     condition     = var.dev_environment || var.bucket_count_override == null
     error_message = "Must set dev_environment=true to use bucket_count_override."

@@ -2,15 +2,13 @@
 
 <a target="_blank" href="https://qumulo.com/"><img src="./.config/images/qumulo-scale-anywhere-logo.webp" style="width:150px;height:53px;"></a>
 
-# NOT FOR PRODUCTION USE
-
 # Deploying Cloud Native Qumulo (CNQ) on GCP Using Terraform [![Latest Release](https://img.shields.io/github/release/qumulo/gcp-terraform-cnq.svg)](https://github.com/qumulo/gcp-terraform-gcp/releases)
 This repository contains comprehensive Terraform modules that let you deploy Google Cloud Storage buckets and then create a CNQ cluster with 1 or 3 to 24 VMs that are well-architected and have fully elastic compute and persistent object storage.
 
 ## Getting Started with Cloud Native Qumulo (CNQ)
 For an overview of CNQ, its reference architecture, and limits, see [How Cloud Native Qumulo Works](https://docs.qumulo.com/gcp-administrator-guide/getting-started/how-cloud-native-qumulo-works.html) and for prerequisites and detailed instructions, see [Deploying Cloud Native Qumulo on GCP with Terraform](https://docs.qumulo.com/gcp-administrator-guide/getting-started/deploying-instance-terraform.html) on the Documentation Portal.
 
-Qumulo Core >= 7.5.5 is required for this Terraform
+Qumulo Core >= 7.6.0 is required for this Terraform
 
 > ✅ **Tip:** For help with deployment, configuration, updates, scaling out your cluster, and best practices for high performance, [message us on Slack](https://docs.qumulo.com/contacting-qumulo-care-team.html).
 

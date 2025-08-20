@@ -8,10 +8,6 @@ content: |-
 
   <a target="_blank" href="https://qumulo.com/"><img src="./.config/images/qumulo-scale-anywhere-logo.webp" style="width:150px;height:53px;"></a>
 
-  # NOT FOR PRODUCTION USE
-  
-  ---
-  
   ## Terraform Documentation
 
   > ℹ️ **Note:** This repository uses documentation generated with Terraform-Docs.  
