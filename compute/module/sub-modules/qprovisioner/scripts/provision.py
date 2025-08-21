@@ -1056,6 +1056,8 @@ def remove_cluster_nodes(config: ProvisioningConfig, firestore: FirestoreManager
 
 def apply_initial_floating_ips(config: ProvisioningConfig, qq_host: str, firestore: FirestoreManager) -> None:
     """Apply initial floating IP configuration"""
+
+    logging.info(f"Applying initial floating IPs: {config.floating_ips}")
     if not config.floating_ips or not config.floating_ips[0]:
         return
 
