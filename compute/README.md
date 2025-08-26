@@ -4,7 +4,7 @@
 
 ## Terraform Documentation
 
-> ℹ️ **Note:** This repository uses documentation generated with Terraform-Docs.  
+> ℹ️ **Note:** This repository uses documentation generated with Terraform-Docs.
 
 ## Requirements
 
@@ -44,7 +44,7 @@
 | <a name="input_q_cluster_floating_ips"></a> [q\_cluster\_floating\_ips](#input\_q\_cluster\_floating\_ips) | The number of floating ips associated with the Qumulo cluster. | `number` | `12` | no |
 | <a name="input_q_cluster_fw_ingress_cidrs"></a> [q\_cluster\_fw\_ingress\_cidrs](#input\_q\_cluster\_fw\_ingress\_cidrs) | OPTIONAL: GCP additional firewall ingress CIDRs for the Qumulo cluster | `string` | `null` | no |
 | <a name="input_q_cluster_name"></a> [q\_cluster\_name](#input\_q\_cluster\_name) | Qumulo cluster name | `string` | `"CNQ"` | no |
-| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"7.5.0"` | no |
+| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"7.6.0"` | no |
 | <a name="input_q_debian_package"></a> [q\_debian\_package](#input\_q\_debian\_package) | Debian or RHL package | `bool` | `true` | no |
 | <a name="input_q_existing_deployment_unique_name"></a> [q\_existing\_deployment\_unique\_name](#input\_q\_existing\_deployment\_unique\_name) | OPTIONAL: The deployment\_unique\_name of the previous deployed cluster you want to replace | `string` | `null` | no |
 | <a name="input_q_fqdn_name"></a> [q\_fqdn\_name](#input\_q\_fqdn\_name) | OPTIONAL: The Fully Qualified Domain Name (FQDN) for Route 53 Private Hosted Zone | `string` | `null` | no |
