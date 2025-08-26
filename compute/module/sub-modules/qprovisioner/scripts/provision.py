@@ -593,9 +593,9 @@ def survey_cluster_state(config: ProvisioningConfig, firestore: FirestoreManager
 
 def validate_qfsd_version(qfsd_version: str, firestore: FirestoreManager) -> None:
     """Validate that Qumulo Core version meets minimum requirements"""
-    # Check for version greater than 7.6.0 to support CNQ on GCP
+    # Check for version greater or equal to 7.6.0 to support CNQ on GCP
     check_version = vercomp(qfsd_version, "7.6.0")
-    if check_version == 2:  # qfsd_version > 7.6.0
+    if check_version == 0 or check_version == 2:  # qfsd_version >= 7.6.0
         logging.info("Qumulo Core >= 7.6.0")
     else:
         error_msg = "Qumulo Core version >= 7.6.0 is required. If this is a new deployment destroy it and redeploy with >= 7.6.0."
