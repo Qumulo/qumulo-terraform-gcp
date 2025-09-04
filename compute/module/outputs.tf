@@ -45,14 +45,14 @@ output "qumulo_primary_ips" {
   value       = var.deploy_provisioner ? module.qprovisioner[0].primary_ips : null
 }
 
-output "qumulo_primary_ips_removed_nodes" {
+output "qumulo_removed_nodes_primary_ips" {
   description = "Qumulo primary IPs of removed nodes"
-  value       = var.deploy_provisioner ? (module.qprovisioner[0].cleanup ? module.qprovisioner[0].cleanup_nodes : null) : null
+  value       = var.deploy_provisioner && module.qprovisioner[0].cleanup ? module.qprovisioner[0].cleanup_nodes : null
 }
 
 output "qumulo_removed_nodes_cleanup" {
   description = "Reminder to cleanup unused resources"
-  value       = var.deploy_provisioner ? (module.qprovisioner[0].cleanup ? "Set q_target_node_count=null, decrease q_node_count=<# of nodes in cluster>, tf apply to destroy unused resources" : null) : null
+  value       = var.deploy_provisioner && module.qprovisioner[0].cleanup ? "Set q_target_node_count=null, decrease q_node_count=<# of nodes in cluster>, tf apply to destroy unused resources" : null
 }
 
 output "qumulo_private_url_node1" {

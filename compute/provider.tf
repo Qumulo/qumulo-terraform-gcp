@@ -61,7 +61,7 @@ data "terraform_remote_state" "persistent_storage" {
 #  backend = "local"
 #
 #  config = {
-#    path = "./persistent-storage/terraform.tfstate"
+#    path = "../persistent-storage/terraform.tfstate"
 #  }
 #}
 #

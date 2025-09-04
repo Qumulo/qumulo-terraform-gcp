@@ -194,15 +194,15 @@ variable "q_existing_deployment_unique_name" {
     error_message = "The deployment_name must be a <=30 characters long and use 0-9 a-z or dash (-). Copy from previous deployment Terraform workspace output."
   }
 }
-variable "q_fqdn_name" {
-  description = "OPTIONAL: The Fully Qualified Domain Name (FQDN) for Route 53 Private Hosted Zone "
-  type        = string
-  default     = null
-  validation {
-    condition     = var.q_fqdn_name == null || can(regex("^[0-9A-Za-z\\.\\-]*$", var.q_fqdn_name))
-    error_message = "The q_fqdn_name may only contain alphanumeric values and dashes (-) and/or dots (.)."
-  }
-}
+#variable "q_fqdn_name" {
+#  description = "OPTIONAL: The Fully Qualified Domain Name (FQDN) for Route 53 Private Hosted Zone "
+#  type        = string
+#  default     = null
+#  validation {
+#    condition     = var.q_fqdn_name == null || can(regex("^[0-9A-Za-z\\.\\-]*$", var.q_fqdn_name))
+#    error_message = "The q_fqdn_name may only contain alphanumeric values and dashes (-) and/or dots (.)."
+#  }
+#}
 variable "q_instance_type" {
   description = "Qumulo GCP compute engine instance type"
   type        = string
