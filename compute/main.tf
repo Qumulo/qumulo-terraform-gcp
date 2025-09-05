@@ -54,7 +54,6 @@ module "compute" {
   q_cluster_version                 = var.q_cluster_version
   q_debian_package                  = var.q_debian_package
   q_existing_deployment_unique_name = var.q_existing_deployment_unique_name
-  q_fqdn_name                       = var.q_fqdn_name
   q_instance_type                   = var.q_instance_type
   q_node_count                      = var.q_node_count
   q_package_url                     = var.q_package_url

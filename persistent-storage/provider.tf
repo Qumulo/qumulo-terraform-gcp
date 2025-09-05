@@ -36,14 +36,3 @@ terraform {
     prefix = "tf-state/persistent-storage"
   }
 }
-
-#Uncomment this block if you are using a local backend
-#If you are storing state locally - not recommended for production - here's an example of how to setup the data source for persistent-storage
-#data "terraform_remote_state" "persistent_storage" {
-#  backend = "local"
-#
-#  config = {
-#    path = "./persistent-storage/terraform.tfstate"
-#  }
-#}
-#

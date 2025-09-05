@@ -4,14 +4,14 @@
 
 ## Terraform Documentation
 
-> ℹ️ **Note:** This repository uses documentation generated with Terraform-Docs.
+> ℹ️ **Note:** This repository uses documentation generated with Terraform-Docs.  
 
 ## Requirements
 
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.0 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 6.0 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | 6.48.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.1 |
 
@@ -47,7 +47,6 @@
 | <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"7.6.0"` | no |
 | <a name="input_q_debian_package"></a> [q\_debian\_package](#input\_q\_debian\_package) | Debian or RHL package | `bool` | `true` | no |
 | <a name="input_q_existing_deployment_unique_name"></a> [q\_existing\_deployment\_unique\_name](#input\_q\_existing\_deployment\_unique\_name) | OPTIONAL: The deployment\_unique\_name of the previous deployed cluster you want to replace | `string` | `null` | no |
-| <a name="input_q_fqdn_name"></a> [q\_fqdn\_name](#input\_q\_fqdn\_name) | OPTIONAL: The Fully Qualified Domain Name (FQDN) for Route 53 Private Hosted Zone | `string` | `null` | no |
 | <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo GCP compute engine instance type | `string` | `"n2-highmem-16"` | no |
 | <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Qumulo cluster node count | `number` | `3` | no |
 | <a name="input_q_package_url"></a> [q\_package\_url](#input\_q\_package\_url) | A URL accessible to the instances pointing to the qumulo-core.deb or qumulo-core.rpm for the version of Qumulo you want to install. If null, default to using the package in the bucket specified by gcs\_bucket\_name and gcs\_bucket\_prefix. | `string` | `null` | no |
@@ -70,9 +69,9 @@
 | <a name="output_qumulo_floating_ips"></a> [qumulo\_floating\_ips](#output\_qumulo\_floating\_ips) | Qumulo floating IPs for IP failover & load distribution.  Use these IPs for the A-records in your DNS. |
 | <a name="output_qumulo_nodes"></a> [qumulo\_nodes](#output\_qumulo\_nodes) | Properties of the nodes in the Qumulo cluster |
 | <a name="output_qumulo_primary_ips"></a> [qumulo\_primary\_ips](#output\_qumulo\_primary\_ips) | Qumulo primary IPs |
-| <a name="output_qumulo_primary_ips_removed_nodes"></a> [qumulo\_primary\_ips\_removed\_nodes](#output\_qumulo\_primary\_ips\_removed\_nodes) | Qumulo primary IPs of removed nodes |
 | <a name="output_qumulo_private_url_node1"></a> [qumulo\_private\_url\_node1](#output\_qumulo\_private\_url\_node1) | Link to private IP for Qumulo Cluster - Node 1 |
 | <a name="output_qumulo_removed_nodes_cleanup"></a> [qumulo\_removed\_nodes\_cleanup](#output\_qumulo\_removed\_nodes\_cleanup) | Reminder to cleanup unused resources |
+| <a name="output_qumulo_removed_nodes_primary_ips"></a> [qumulo\_removed\_nodes\_primary\_ips](#output\_qumulo\_removed\_nodes\_primary\_ips) | Qumulo primary IPs of removed nodes |
 
 ---
 

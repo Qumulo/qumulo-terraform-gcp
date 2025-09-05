@@ -463,7 +463,7 @@ locals {
   fs_get_status_ps1 = "${var.scripts_path}fs_get_status.ps1"
   token             = data.external.fs-token.result["value"]
 
-  floating_ips_deployment_unique_name = var.existing_deployment_unique_name != null ? var.existing_deployment_unique_name : var.deployment_unique_name
+  floating_ips_deployment_unique_name = var.existing_deployment_unique_name != null && var.replacement_cluster ? var.existing_deployment_unique_name : var.deployment_unique_name
   existing_floating_ips_result        = data.external.existing-floating-ips.result["value"]
   existing_floating_ips               = local.existing_floating_ips_result != "null" ? tolist(split(",", local.existing_floating_ips_result)) : []
   all_floating_ips                    = tolist(setunion(local.existing_floating_ips, var.cluster_floating_ips))
@@ -510,6 +510,8 @@ data "external" "existing-floating-ips" {
     ] : [
     "bash", "${local.fs_get_sh}", "float-ips", var.gcp_project, var.cluster_persistent_storage_deployment_unique_name, local.floating_ips_deployment_unique_name, local.token, "false"
   ]
+
+  depends_on = [google_firestore_document.float-ips]
 }
 
 resource "null_resource" "provisioner_status" {

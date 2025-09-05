@@ -582,7 +582,7 @@ resource "google_compute_instance" "node" {
   }
 
   lifecycle {
-    ignore_changes = [attached_disk, boot_disk, machine_type, metadata_startup_script, name, network_interface, labels, zone]
+    ignore_changes = [attached_disk, boot_disk, machine_type, metadata_startup_script, name, network_interface, scratch_disk, labels, zone]
 
     precondition {
       condition     = local.check_cluster_remove_nodes == false
