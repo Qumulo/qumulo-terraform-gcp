@@ -206,7 +206,7 @@ variable "q_existing_deployment_unique_name" {
 variable "q_instance_type" {
   description = "Qumulo GCP compute engine instance type"
   type        = string
-  default     = "n2-highmem-16"
+  default     = "z3-highmem-14-standardlssd"
   nullable    = false
   validation {
     condition = anytrue([

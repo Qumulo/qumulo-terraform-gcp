@@ -41,13 +41,13 @@ q_cluster_version        = "7.6.0"
 # tf_persistent_storage_workspace   - Terraform workspace name (no path) for the persistent-storage deployment.  This is 'default' by default whether state is local or remote for Terraform.
 #                                     A reasonable default configuration for the provider.tf files is provided and should be reviewed/modified prior to Terraform init.
 # q_persistent_storage_type         - CNQ Hot uses hot_gcs_std.  CNQ Cold is not yet supported.
-# q_instance_type                   - >= n2-highmem-8 or >= n2d-highmem-8.
+# q_instance_type                   - >= z3-highmem-8-highlssd, >= z3-highmem-14-standardlssd, >= n2-highmem-8 or >= n2d-highmem-8.
 # q_node_count                      - Total # GCE Instances in the cluster 3 to 24, or 1.
 #                                     Increase this number to expand the cluster by adding nodes.
 #                                     Decrease this number to destroy unused resources AFTER doing a Terraform apply with q_target_node_count to statefully remove node(s) from the cluster.
 tf_persistent_storage_workspace = "default"
 q_persistent_storage_type       = "hot_gcs_std"
-q_instance_type                 = "n2-highmem-8"
+q_instance_type                 = "z3-highmem-14-standardlssd"
 q_node_count                    = 3
 
 # ****************************** Optional **************************************************************
