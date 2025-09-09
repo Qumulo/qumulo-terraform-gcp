@@ -47,7 +47,7 @@
 | <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"7.6.0"` | no |
 | <a name="input_q_debian_package"></a> [q\_debian\_package](#input\_q\_debian\_package) | Debian or RHL package | `bool` | `true` | no |
 | <a name="input_q_existing_deployment_unique_name"></a> [q\_existing\_deployment\_unique\_name](#input\_q\_existing\_deployment\_unique\_name) | OPTIONAL: The deployment\_unique\_name of the previous deployed cluster you want to replace | `string` | `null` | no |
-| <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo GCP compute engine instance type | `string` | `"z3-highmem-14-standardlssd"` | no |
+| <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo GCP compute engine instance type | `string` | `"z3-highmem-8-highlssd"` | no |
 | <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Qumulo cluster node count | `number` | `3` | no |
 | <a name="input_q_package_url"></a> [q\_package\_url](#input\_q\_package\_url) | A URL accessible to the instances pointing to the qumulo-core.deb or qumulo-core.rpm for the version of Qumulo you want to install. If null, default to using the package in the bucket specified by gcs\_bucket\_name and gcs\_bucket\_prefix. | `string` | `null` | no |
 | <a name="input_q_persistent_storage_type"></a> [q\_persistent\_storage\_type](#input\_q\_persistent\_storage\_type) | GCS storage class to persist data in. CNQ Hot uses hot\_gcs\_std. | `string` | `"hot_gcs_std"` | no |
