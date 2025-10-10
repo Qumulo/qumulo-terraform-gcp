@@ -59,7 +59,7 @@ resource "google_compute_firewall" "egress" {
   name     = "${var.deployment_unique_name}-qumulo-provisioner-egress"
   network  = var.gcp_vpc_name
   priority = 700
-  project  = var.gcp_project
+  project  = var.gcp_project_id
 
   allow {
     protocol = "all"
@@ -75,7 +75,7 @@ resource "google_compute_firewall" "ingress" {
   name     = "${var.deployment_unique_name}-qumulo-provisioner-ingress"
   network  = var.gcp_vpc_name
   priority = 700
-  project  = var.gcp_project
+  project  = var.gcp_project_id
 
   dynamic "allow" {
     for_each = local.ingress_rules
@@ -92,7 +92,7 @@ resource "google_compute_firewall" "ingress" {
 }
 
 resource "google_firestore_document" "creation-number-azs" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "creation-number-azs"
@@ -105,7 +105,7 @@ resource "google_firestore_document" "creation-number-azs" {
 }
 
 resource "google_firestore_document" "creation-version" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "creation-version"
@@ -118,7 +118,7 @@ resource "google_firestore_document" "creation-version" {
 }
 
 resource "google_firestore_document" "installed-version" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "installed-version"
@@ -131,7 +131,7 @@ resource "google_firestore_document" "installed-version" {
 }
 
 resource "google_firestore_document" "cluster-type" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "cluster-type"
@@ -144,7 +144,7 @@ resource "google_firestore_document" "cluster-type" {
 }
 
 resource "google_firestore_document" "cluster-secrets-name" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "cluster-secrets-name"
@@ -157,7 +157,7 @@ resource "google_firestore_document" "cluster-secrets-name" {
 }
 
 resource "google_firestore_document" "bucket-uris" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "bucket-uris"
@@ -170,7 +170,7 @@ resource "google_firestore_document" "bucket-uris" {
 }
 
 resource "google_firestore_document" "bucket-names" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "bucket-names"
@@ -183,7 +183,7 @@ resource "google_firestore_document" "bucket-names" {
 }
 
 resource "google_firestore_document" "soft-capacity-limit" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "soft-capacity-limit"
@@ -196,7 +196,7 @@ resource "google_firestore_document" "soft-capacity-limit" {
 }
 
 resource "google_firestore_document" "tunables" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "tunables"
@@ -209,7 +209,7 @@ resource "google_firestore_document" "tunables" {
 }
 
 resource "google_firestore_document" "fault-domain-ids" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "fault-domain-ids"
@@ -222,7 +222,7 @@ resource "google_firestore_document" "fault-domain-ids" {
 }
 
 resource "google_firestore_document" "instance-ids" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "instance-ids"
@@ -235,7 +235,7 @@ resource "google_firestore_document" "instance-ids" {
 }
 
 resource "google_firestore_document" "node-ips" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "node-ips"
@@ -248,7 +248,7 @@ resource "google_firestore_document" "node-ips" {
 }
 
 resource "google_firestore_document" "float-ips" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "float-ips"
@@ -261,7 +261,7 @@ resource "google_firestore_document" "float-ips" {
 }
 
 resource "google_firestore_document" "uuid" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "uuid"
@@ -274,7 +274,7 @@ resource "google_firestore_document" "uuid" {
 }
 
 resource "google_firestore_document" "last-run-status" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "last-run-status"
@@ -287,7 +287,7 @@ resource "google_firestore_document" "last-run-status" {
 }
 
 resource "google_firestore_document" "floating-ip-count" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.cluster_persistent_storage_deployment_unique_name
   document_id = "floating-ip-count"
@@ -302,7 +302,7 @@ resource "google_firestore_document" "floating-ip-count" {
 resource "google_service_account" "q_access" {
   account_id   = "${var.deployment_unique_name}-pvn"
   display_name = "Qumulo Provisioner Service Account"
-  project      = var.gcp_project
+  project      = var.gcp_project_id
 }
 
 resource "google_project_iam_custom_role" "provisioner_role" {
@@ -310,7 +310,7 @@ resource "google_project_iam_custom_role" "provisioner_role" {
   role_id     = "${local.deployment_unique_name_underscore}_provisioner_role"
   title       = "Qumulo GCE Role for Provisioner ${var.deployment_unique_name}"
   description = "Permissions for the provisioner compute instance"
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   permissions = [
     "compute.disks.get",
     "compute.disks.setLabels",
@@ -334,7 +334,7 @@ resource "google_project_iam_custom_role" "provisioner_role" {
 }
 
 resource "google_project_iam_member" "provisioner_role_binding" {
-  project = var.gcp_project
+  project = var.gcp_project_id
   role    = var.gcp_provisioner_custom_role == null ? google_project_iam_custom_role.provisioner_role[0].id : var.gcp_provisioner_custom_role
   member  = "serviceAccount:${google_service_account.q_access.email}"
 }
@@ -372,7 +372,7 @@ resource "google_storage_bucket_iam_member" "utility_bucket_role_binding" {
 resource "google_compute_instance" "provisioner" {
   machine_type = var.instance_type
   name         = "${var.deployment_unique_name}-provisioner"
-  project      = var.gcp_project
+  project      = var.gcp_project_id
   tags         = ["${var.deployment_unique_name}-provisioner"]
   zone         = var.gcp_zone
 
@@ -399,7 +399,7 @@ resource "google_compute_instance" "provisioner" {
     qumulo_package_url                        = var.qumulo_package_url
     persistent_storage_deployment_unique_name = var.cluster_persistent_storage_deployment_unique_name
     primary_ips                               = join(",", var.cluster_primary_ips)
-    project                                   = var.gcp_project
+    project                                   = var.gcp_project_id
     region                                    = var.gcp_region
     replacement_cluster                       = var.replacement_cluster
     subnet_cidr                               = var.subnet_cidr
@@ -412,14 +412,14 @@ resource "google_compute_instance" "provisioner" {
     dev_environment                           = var.dev_environment
   })
 
-  labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner" })
+  labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner" }, { goog-partner-solution = "solution_urn" })
 
   boot_disk {
     initialize_params {
       image  = local.gce_image
       size   = 40
       type   = var.boot_type
-      labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner-boot-disk" })
+      labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner-boot-disk" }, { goog-partner-solution = "solution_urn" })
     }
 
     kms_key_self_link = try(local.boot_disk[0].kms_key_self_link, null)
@@ -428,7 +428,7 @@ resource "google_compute_instance" "provisioner" {
   network_interface {
     network            = var.gcp_vpc_name
     subnetwork         = var.gcp_subnet_name
-    subnetwork_project = var.gcp_project
+    subnetwork_project = var.gcp_project_id
   }
 
   scheduling {
@@ -442,7 +442,7 @@ resource "google_compute_instance" "provisioner" {
   }
 
   lifecycle {
-    ignore_changes = [boot_disk, network_interface, labels]
+    ignore_changes = [boot_disk, network_interface]
   }
 }
 
@@ -453,7 +453,7 @@ locals {
   is_windows  = substr(pathexpand("~"), 0, 1) == "/" ? false : true
   status_sh   = "${var.scripts_path}status.sh"
   status_ps1  = "${var.scripts_path}status.ps1"
-  status_vars = { project = var.gcp_project, database = var.cluster_persistent_storage_deployment_unique_name, collection = var.deployment_unique_name, gce_instance_name = google_compute_instance.provisioner.name, token = local.token }
+  status_vars = { project = var.gcp_project_id, database = var.cluster_persistent_storage_deployment_unique_name, collection = var.deployment_unique_name, gce_instance_name = google_compute_instance.provisioner.name, token = local.token }
 
   fs_get_token_sh   = "${var.scripts_path}fs_get_token.sh"
   fs_get_token_ps1  = "${var.scripts_path}fs_get_token.ps1"
@@ -472,11 +472,11 @@ locals {
 data "external" "fs-token" {
   program = local.is_windows ? [
     "powershell", "-ExecutionPolicy", "Bypass", "-File", "${local.fs_get_token_ps1}",
-    var.gcp_project,
+    var.gcp_project_id,
     var.cluster_persistent_storage_deployment_unique_name,
     var.deployment_unique_name
     ] : [
-    "bash", "${local.fs_get_token_sh}", var.gcp_project, var.cluster_persistent_storage_deployment_unique_name, var.deployment_unique_name
+    "bash", "${local.fs_get_token_sh}", var.gcp_project_id, var.cluster_persistent_storage_deployment_unique_name, var.deployment_unique_name
   ]
 
   depends_on = [google_firestore_document.last-run-status]
@@ -486,13 +486,13 @@ data "external" "provisioner" {
   program = local.is_windows ? [
     "powershell", "-ExecutionPolicy", "Bypass", "-File", "${local.fs_get_status_ps1}",
     "last-run-status",
-    var.gcp_project,
+    var.gcp_project_id,
     var.cluster_persistent_storage_deployment_unique_name,
     var.deployment_unique_name,
     local.token,
     "false"
     ] : [
-    "bash", "${local.fs_get_status_sh}", "last-run-status", var.gcp_project, var.cluster_persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, "false"
+    "bash", "${local.fs_get_status_sh}", "last-run-status", var.gcp_project_id, var.cluster_persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, "false"
   ]
 
   depends_on = [null_resource.provisioner_status]
@@ -502,13 +502,13 @@ data "external" "existing-floating-ips" {
   program = local.is_windows ? [
     "powershell", "-ExecutionPolicy", "Bypass", "-File", "${local.fs_get_ps1}",
     "float-ips",
-    var.gcp_project,
+    var.gcp_project_id,
     var.cluster_persistent_storage_deployment_unique_name,
     local.floating_ips_deployment_unique_name,
     local.token,
     "false"
     ] : [
-    "bash", "${local.fs_get_sh}", "float-ips", var.gcp_project, var.cluster_persistent_storage_deployment_unique_name, local.floating_ips_deployment_unique_name, local.token, "false"
+    "bash", "${local.fs_get_sh}", "float-ips", var.gcp_project_id, var.cluster_persistent_storage_deployment_unique_name, local.floating_ips_deployment_unique_name, local.token, "false"
   ]
 
   depends_on = [google_firestore_document.float-ips]

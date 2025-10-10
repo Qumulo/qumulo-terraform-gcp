@@ -20,8 +20,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
-# **** Version 1.2 ****
-
 locals {
   persistent_storage = data.terraform_remote_state.persistent_storage.outputs.outputs_persistent_storage
 }
@@ -31,7 +29,7 @@ module "compute" {
 
   gce_image_name                    = var.gce_image_name
   gce_ssh_public_key_path           = var.gce_ssh_public_key_path
-  gcp_project                       = var.gcp_project
+  gcp_project_id                    = var.gcp_project_id
   gcp_region                        = var.gcp_region
   gcp_subnet_name                   = var.gcp_subnet_name
   gcp_vpc_name                      = var.gcp_vpc_name

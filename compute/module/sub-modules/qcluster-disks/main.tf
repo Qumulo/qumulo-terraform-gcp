@@ -28,8 +28,8 @@ resource "google_compute_disk" "persistent_disk" {
   size    = var.devices[count.index].volume_size
   type    = var.devices[count.index].volume_type
   zone    = var.node.zone
-  labels  = merge(var.labels, { name = "${var.node.name}-${var.devices[count.index].volume_label}-${var.devices[count.index].device_name}" })
-  project = var.gcp_project
+  labels  = merge(var.labels, { name = "${var.node.name}-${var.devices[count.index].volume_label}-${var.devices[count.index].device_name}" }, { goog-partner-solution = "solution_urn" })
+  project = var.gcp_project_id
 
   provisioned_throughput = var.devices[count.index].volume_type == "pd-ssd" || var.devices[count.index].volume_type == "pd-balanced" ? null : var.devices[count.index].volume_tput
   provisioned_iops       = var.devices[count.index].volume_type == "pd-ssd" || var.devices[count.index].volume_type == "pd-balanced" ? null : var.devices[count.index].volume_iops
@@ -43,7 +43,7 @@ resource "google_compute_disk" "persistent_disk" {
   }
 
   lifecycle {
-    ignore_changes = [disk_encryption_key, labels, name, size, type, zone]
+    ignore_changes = [disk_encryption_key, name, size, type, zone]
   }
 }
 
@@ -52,6 +52,6 @@ resource "google_compute_attached_disk" "persistent_disk" {
 
   disk     = google_compute_disk.persistent_disk[count.index].id
   instance = var.node.id
-  project  = var.gcp_project
+  project  = var.gcp_project_id
 }
 

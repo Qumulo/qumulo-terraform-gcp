@@ -50,12 +50,12 @@ output "primary_ips" {
 
 output "status" {
   description = "If the provisioner instance completed secondary provisioning of the cluster = Success/Failure"
-  value       = var.check_provisioner_shutdown ? data.external.provisioner.result["value"] == "Shutting down provisioning instance" ? "Success" : "FAILURE" : "Validate secondary provisioning of the cluster completed.  Verify GCE Instance ID ${google_compute_instance.provisioner.id} auto shutdown or check Firestore https://firestore.googleapis.com/v1/projects/${var.gcp_project}/databases/${var.cluster_persistent_storage_deployment_unique_name}/documents/${var.deployment_unique_name}/last-run-status}"
+  value       = var.check_provisioner_shutdown ? data.external.provisioner.result["value"] == "Shutting down provisioning instance" ? "Success" : "FAILURE" : "Validate secondary provisioning of the cluster completed.  Verify GCE Instance ID ${google_compute_instance.provisioner.id} auto shutdown or check Firestore https://firestore.googleapis.com/v1/projects/${var.gcp_project_id}/databases/${var.cluster_persistent_storage_deployment_unique_name}/documents/${var.deployment_unique_name}/last-run-status}"
 }
 
 output "provisioner" {
   description = "Provisioner instance"
-  value       = {
+  value = {
     name       = local.provisioner.name
     private_ip = local.provisioner.network_interface.0.network_ip
   }

@@ -48,7 +48,7 @@ variable "labels" {
   description = "Labels to apply to resources"
   type        = map(string)
 }
-variable "gcp_project" {
+variable "gcp_project_id" {
   description = "GCP project"
   type        = string
   nullable    = false

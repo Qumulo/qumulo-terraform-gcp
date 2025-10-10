@@ -24,7 +24,7 @@ variable "gcp_number_azs" {
   description = "GCP Number of AZs"
   type        = number
 }
-variable "gcp_project" {
+variable "gcp_project_id" {
   description = "GCP project"
   type        = string
   nullable    = false

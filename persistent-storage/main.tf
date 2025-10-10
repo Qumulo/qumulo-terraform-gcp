@@ -24,7 +24,7 @@ module "persistent_storage" {
   source = "./module/"
 
   deployment_name     = var.deployment_name
-  gcp_project         = var.gcp_project
+  gcp_project_id      = var.gcp_project_id
   gcp_region          = var.gcp_region
   prevent_destroy     = var.prevent_destroy
   soft_capacity_limit = var.soft_capacity_limit
