@@ -36,7 +36,7 @@ variable "gcp_number_azs" {
   description = "GCP Number of AZs"
   type        = number
 }
-variable "gcp_project" {
+variable "gcp_project_id" {
   description = "GCP project"
   type        = string
   nullable    = false
@@ -185,8 +185,10 @@ variable "gce_map" {
   type = map(object({
     wcacheSlots : number
     wcacheSize : number
-    wcacheIOPS : number
-    wcacheTput : number
+    wcacheIOPS_lt25 : number
+    wcacheTput_lt25 : number
+    wcacheIOPS_gt24 : number
+    wcacheTput_gt24 : number
     wcacheRefillIOPs : number
     wcacheRefillBps : number
     dkvSlots : number
@@ -199,8 +201,10 @@ variable "gce_map" {
     "z3-highmem-8-highlssd" = {
       wcacheSlots      = 4
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3400
+      wcacheTput_lt25  = 380
+      wcacheIOPS_gt24  = 5400
+      wcacheTput_gt24  = 460
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -212,8 +216,10 @@ variable "gce_map" {
     "z3-highmem-16-highlssd" = {
       wcacheSlots      = 8
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 4700
+      wcacheTput_lt25  = 390
+      wcacheIOPS_gt24  = 5700
+      wcacheTput_gt24  = 490
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -223,10 +229,12 @@ variable "gce_map" {
       netTier1         = false
     }
     "z3-highmem-22-highlssd" = {
-      wcacheSlots      = 16
+      wcacheSlots      = 8
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 4700
+      wcacheTput_lt25  = 390
+      wcacheIOPS_gt24  = 5700
+      wcacheTput_gt24  = 490
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -236,10 +244,12 @@ variable "gce_map" {
       netTier1         = false
     }
     "z3-highmem-32-highlssd" = {
-      wcacheSlots      = 24
+      wcacheSlots      = 11
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 5060
+      wcacheTput_lt25  = 420
+      wcacheIOPS_gt24  = 5800
+      wcacheTput_gt24  = 500
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -249,10 +259,12 @@ variable "gce_map" {
       netTier1         = false
     }
     "z3-highmem-44-highlssd" = {
-      wcacheSlots      = 32
+      wcacheSlots      = 11
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 5060
+      wcacheTput_lt25  = 420
+      wcacheIOPS_gt24  = 5800
+      wcacheTput_gt24  = 500
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -262,10 +274,12 @@ variable "gce_map" {
       netTier1         = true
     }
     "z3-highmem-14-standardlssd" = {
-      wcacheSlots      = 7
+      wcacheSlots      = 8
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 4700
+      wcacheTput_lt25  = 390
+      wcacheIOPS_gt24  = 5700
+      wcacheTput_gt24  = 490
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -275,10 +289,12 @@ variable "gce_map" {
       netTier1         = false
     }
     "z3-highmem-22-standardlssd" = {
-      wcacheSlots      = 16
+      wcacheSlots      = 8
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 4700
+      wcacheTput_lt25  = 390
+      wcacheIOPS_gt24  = 5700
+      wcacheTput_gt24  = 490
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -288,10 +304,12 @@ variable "gce_map" {
       netTier1         = false
     }
     "z3-highmem-44-highlssd" = {
-      wcacheSlots      = 32
+      wcacheSlots      = 11
       wcacheSize       = 16
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 5060
+      wcacheTput_lt25  = 420
+      wcacheIOPS_gt24  = 5800
+      wcacheTput_gt24  = 500
       wcacheRefillIOPs = 0
       wcacheRefillBps  = 0
       dkvSlots         = 4
@@ -303,8 +321,10 @@ variable "gce_map" {
     "n2-highmem-8" = {
       wcacheSlots      = 3
       wcacheSize       = 50
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 3500
       wcacheRefillBps  = 167
       dkvSlots         = 4
@@ -316,8 +336,10 @@ variable "gce_map" {
     "n2-highmem-16" = {
       wcacheSlots      = 4
       wcacheSize       = 200
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 7500
       wcacheRefillBps  = 250
       dkvSlots         = 4
@@ -329,8 +351,10 @@ variable "gce_map" {
     "n2-highmem-32" = {
       wcacheSlots      = 8
       wcacheSize       = 250
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 8250
       wcacheRefillBps  = 250
       dkvSlots         = 4
@@ -342,8 +366,10 @@ variable "gce_map" {
     "n2-highmem-48" = {
       wcacheSlots      = 12
       wcacheSize       = 250
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 8000
       wcacheRefillBps  = 234
       dkvSlots         = 4
@@ -355,8 +381,10 @@ variable "gce_map" {
     "n2d-highmem-8" = {
       wcacheSlots      = 3
       wcacheSize       = 50
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 3500
       wcacheRefillBps  = 167
       dkvSlots         = 4
@@ -368,8 +396,10 @@ variable "gce_map" {
     "n2d-highmem-16" = {
       wcacheSlots      = 4
       wcacheSize       = 200
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 7500
       wcacheRefillBps  = 250
       dkvSlots         = 4
@@ -381,8 +411,10 @@ variable "gce_map" {
     "n2d-highmem-32" = {
       wcacheSlots      = 8
       wcacheSize       = 250
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 8250
       wcacheRefillBps  = 250
       dkvSlots         = 4
@@ -394,8 +426,10 @@ variable "gce_map" {
     "n2d-highmem-48" = {
       wcacheSlots      = 12
       wcacheSize       = 250
-      wcacheIOPS       = 3000
-      wcacheTput       = 140
+      wcacheIOPS_lt25  = 3000
+      wcacheTput_lt25  = 140
+      wcacheIOPS_gt24  = 3000
+      wcacheTput_gt24  = 140
       wcacheRefillIOPs = 8000
       wcacheRefillBps  = 234
       dkvSlots         = 4

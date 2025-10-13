@@ -20,11 +20,11 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
-# **** Version 1.0 ****
+# **** Version 1.1 ****
 
 resource "null_resource" "project_lock" {
   triggers = {
-    deployment_project = var.gcp_project
+    deployment_project = var.gcp_project_id
   }
 
   lifecycle { ignore_changes = all }
@@ -111,7 +111,7 @@ resource "google_storage_bucket" "cnq_bucket" {
   storage_class               = "regional"
   uniform_bucket_level_access = true
 
-  labels = merge(var.labels, { name = "${random_string.bucket[count.index].id}-${local.deployment_unique_name}-qps-${count.index + 1}" })
+  labels = merge(var.labels, { name = "${random_string.bucket[count.index].id}-${local.deployment_unique_name}-qps-${count.index + 1}" }, { goog-partner-solution = "solution_urn" })
 
   hierarchical_namespace {
     enabled = true
@@ -128,8 +128,7 @@ resource "google_storage_bucket" "cnq_bucket" {
       location,
       project,
       storage_class,
-      uniform_bucket_level_access,
-      labels
+      uniform_bucket_level_access
     ]
   }
 }

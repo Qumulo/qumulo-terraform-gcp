@@ -30,7 +30,7 @@ variable "gce_ssh_public_key_path" {
   type        = string
   default     = null
 }
-variable "gcp_project" {
+variable "gcp_project_id" {
   description = "GCP project"
   type        = string
   nullable    = false
@@ -119,7 +119,7 @@ variable "kms_key_name" {
 variable "q_boot_dkv_type" {
   description = "OPTIONAL: Specify the type of Disk for the boot drive and dkv drives"
   type        = string
-  default     = "hyperdisk-balanced"
+  default     = "pd-balanced"
   validation {
     condition = anytrue([
       var.q_boot_dkv_type == "hyperdisk-balanced",
@@ -174,7 +174,7 @@ variable "q_cluster_name" {
 variable "q_cluster_version" {
   description = "Qumulo cluster software version"
   type        = string
-  default     = "7.6.0"
+  default     = "7.6.3.1"
   validation {
     condition     = can(regex("^((4\\.[2-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?)|([5-9][0-9]?\\.[0-9]\\.[0-9][a-zA-Z0-9]?\\.?[0-9]?[a-zA-Z0-9]?))$", var.q_cluster_version))
     error_message = "The q_cluster_version 7.6.0 or greater. Examples: 7.6.0.1, 7.6.1, 7.7.0, etc."

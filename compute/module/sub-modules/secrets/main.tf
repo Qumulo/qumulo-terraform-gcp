@@ -26,7 +26,7 @@ locals {
 
 resource "google_secret_manager_secret" "compute_secret" {
   secret_id = local.secret_id
-  project   = var.gcp_project
+  project   = var.gcp_project_id
 
   labels = merge(var.labels, { name = "${var.deployment_unique_name}" })
 

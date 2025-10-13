@@ -32,7 +32,7 @@ data "google_compute_image" "rocky" {
 
 data "google_compute_subnetwork" "selected" {
   name    = var.gcp_subnet_name
-  project = var.gcp_project
+  project = var.gcp_project_id
   region  = var.gcp_region
 }
 
@@ -45,7 +45,7 @@ resource "google_compute_address" "floating" {
 }
 
 resource "google_firestore_document" "new-cluster" {
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   collection  = var.deployment_unique_name
   database    = var.persistent_storage_deployment_unique_name
   document_id = "new-cluster"
@@ -60,11 +60,11 @@ resource "google_firestore_document" "new-cluster" {
 data "external" "fs-token" {
   program = local.is_windows ? [
     "powershell", "-ExecutionPolicy", "Bypass", "-File", "${local.fs_get_token_ps1}",
-    var.gcp_project,
+    var.gcp_project_id,
     var.persistent_storage_deployment_unique_name,
     var.deployment_unique_name
     ] : [
-    "bash", "${local.fs_get_token_sh}", var.gcp_project, var.persistent_storage_deployment_unique_name, var.deployment_unique_name
+    "bash", "${local.fs_get_token_sh}", var.gcp_project_id, var.persistent_storage_deployment_unique_name, var.deployment_unique_name
   ]
 }
 
@@ -72,13 +72,13 @@ data "external" "new-cluster" {
   program = local.is_windows ? [
     "powershell", "-ExecutionPolicy", "Bypass", "-File", "${local.fs_get_ps1}",
     "new-cluster",
-    var.gcp_project,
+    var.gcp_project_id,
     var.persistent_storage_deployment_unique_name,
     var.deployment_unique_name,
     local.token,
     "false"
     ] : [
-    "bash", "${local.fs_get_sh}", "new-cluster", var.gcp_project, var.persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, "false"
+    "bash", "${local.fs_get_sh}", "new-cluster", var.gcp_project_id, var.persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, "false"
   ]
 
   depends_on = [google_firestore_document.new-cluster]
@@ -88,13 +88,13 @@ data "external" "instance-ids" {
   program = local.is_windows ? [
     "powershell", "-ExecutionPolicy", "Bypass", "-File", "${local.fs_get_ps1}",
     "instance-ids",
-    var.gcp_project,
+    var.gcp_project_id,
     var.persistent_storage_deployment_unique_name,
     var.deployment_unique_name,
     local.token,
     local.new_cluster ? "true" : "false"
     ] : [
-    "bash", "${local.fs_get_sh}", "instance-ids", var.gcp_project, var.persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, local.new_cluster
+    "bash", "${local.fs_get_sh}", "instance-ids", var.gcp_project_id, var.persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, local.new_cluster
   ]
 
   depends_on = [google_firestore_document.new-cluster]
@@ -104,13 +104,13 @@ data "external" "floating-ip-count" {
   program = local.is_windows ? [
     "powershell", "-ExecutionPolicy", "Bypass", "-File", "${local.fs_get_ps1}",
     "floating-ip-count",
-    var.gcp_project,
+    var.gcp_project_id,
     var.persistent_storage_deployment_unique_name,
     var.deployment_unique_name,
     local.token,
     local.new_cluster ? "true" : "false"
     ] : [
-    "bash", "${local.fs_get_sh}", "floating-ip-count", var.gcp_project, var.persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, local.new_cluster
+    "bash", "${local.fs_get_sh}", "floating-ip-count", var.gcp_project_id, var.persistent_storage_deployment_unique_name, var.deployment_unique_name, local.token, local.new_cluster
   ]
 
   depends_on = [google_firestore_document.new-cluster]
@@ -282,12 +282,16 @@ locals {
   ]
 
   # Write cache tput/iops
-  write_cache_tput = var.write_cache_tput == null ? lookup(var.gce_map[var.instance_type], "wcacheTput") : var.write_cache_tput
-  write_cache_iops = var.write_cache_iops == null ? lookup(var.gce_map[var.instance_type], "wcacheIOPS") : var.write_cache_iops
+  write_cache_tput_lt25 = var.write_cache_tput == null ? lookup(var.gce_map[var.instance_type], "wcacheTput_lt25") : var.write_cache_tput
+  write_cache_iops_lt25 = var.write_cache_iops == null ? lookup(var.gce_map[var.instance_type], "wcacheIOPS_lt25") : var.write_cache_iops
+  write_cache_tput_gt24 = var.write_cache_tput == null ? lookup(var.gce_map[var.instance_type], "wcacheTput_gt24") : var.write_cache_tput
+  write_cache_iops_gt24 = var.write_cache_iops == null ? lookup(var.gce_map[var.instance_type], "wcacheIOPS_gt24") : var.write_cache_iops
+  write_cache_tput      = var.node_count < 25 ? local.write_cache_tput_lt25 : local.write_cache_tput_gt24
+  write_cache_iops      = var.node_count < 25 ? local.write_cache_iops_lt25 : local.write_cache_iops_gt24
 
   # Cluster tunables
-  refill_IOPS = lookup(var.gce_map[var.instance_type], "wcacheRefillIOPs")
-  refill_Bps  = lookup(var.gce_map[var.instance_type], "wcacheRefillBps")
+  refill_IOPS = startswith(var.instance_type, "n2-") ? lookup(var.gce_map[var.instance_type], "wcacheRefillIOPs") : local.write_cache_iops
+  refill_Bps  = startswith(var.instance_type, "n2-") ? lookup(var.gce_map[var.instance_type], "wcacheRefillBps") : local.write_cache_tput
   disk_count  = lookup(var.gce_map[var.instance_type], "wcacheSlots")
 
   # Read Cache disks
@@ -402,7 +406,7 @@ resource "google_compute_firewall" "egress" {
   name     = "${var.deployment_unique_name}-qumulo-egress"
   network  = var.gcp_vpc_name
   priority = 700
-  project  = var.gcp_project
+  project  = var.gcp_project_id
 
   allow {
     protocol = "all"
@@ -418,7 +422,7 @@ resource "google_compute_firewall" "ingress" {
   name     = "${var.deployment_unique_name}-qumulo-ingress"
   network  = var.gcp_vpc_name
   priority = 700
-  project  = var.gcp_project
+  project  = var.gcp_project_id
 
   dynamic "allow" {
     for_each = local.ingress_rules
@@ -438,7 +442,7 @@ resource "google_compute_firewall" "internal" {
   name     = "${var.deployment_unique_name}-qumulo-internal"
   network  = var.gcp_vpc_name
   priority = 700
-  project  = var.gcp_project
+  project  = var.gcp_project_id
 
   allow {
     protocol = "all"
@@ -452,7 +456,7 @@ resource "google_compute_firewall" "internal" {
 resource "google_service_account" "q_access" {
   account_id   = "${var.deployment_unique_name}-cpt"
   display_name = "Qumulo Cluster Service Account"
-  project      = var.gcp_project
+  project      = var.gcp_project_id
 }
 
 resource "google_project_iam_custom_role" "cluster_role" {
@@ -460,7 +464,7 @@ resource "google_project_iam_custom_role" "cluster_role" {
   role_id     = "${local.deployment_unique_name_underscore}_cluster_role"
   title       = "Qumulo GCE Role for Cluster ${var.deployment_unique_name}"
   description = "Permissions for compute instances in the cluster"
-  project     = var.gcp_project
+  project     = var.gcp_project_id
   permissions = [
     "logging.logEntries.create",
     "compute.instances.get",
@@ -471,7 +475,7 @@ resource "google_project_iam_custom_role" "cluster_role" {
 }
 
 resource "google_project_iam_member" "cluster_role_binding" {
-  project = var.gcp_project
+  project = var.gcp_project_id
   role    = var.gcp_cluster_custom_role == null ? google_project_iam_custom_role.cluster_role[0].id : var.gcp_cluster_custom_role
   member  = "serviceAccount:${google_service_account.q_access.email}"
 }
@@ -510,7 +514,7 @@ resource "google_compute_resource_policy" "placement_policy" {
   count = var.gcp_number_azs == 1 && !startswith(var.instance_type, "z3-") ? 1 : 0
 
   name    = var.deployment_unique_name
-  project = var.gcp_project
+  project = var.gcp_project_id
   region  = var.gcp_region
   group_placement_policy {
     collocation = "COLLOCATED"
@@ -523,7 +527,7 @@ resource "google_compute_instance" "node" {
   deletion_protection = var.term_protection
   machine_type        = var.instance_type
   name                = "${var.deployment_unique_name}-node-${count.index + 1}"
-  project             = var.gcp_project
+  project             = var.gcp_project_id
   resource_policies   = var.gcp_number_azs == 1 && !startswith(var.instance_type, "z3-") ? [google_compute_resource_policy.placement_policy[0].self_link] : []
   tags                = ["${var.deployment_unique_name}-cluster"]
   zone                = var.gcp_zone_per_node[count.index]
@@ -536,14 +540,14 @@ resource "google_compute_instance" "node" {
     functions_gcs_prefix   = var.functions_gcs_prefix
   })
 
-  labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}" })
+  labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}" }, { goog-partner-solution = "solution_urn" })
 
   boot_disk {
     initialize_params {
       image  = var.gce_image_name == null ? local.gce_image : var.gce_image_name
       size   = var.boot_drive_size
       type   = var.boot_dkv_type
-      labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}-boot-disk" })
+      labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}-boot-disk" }, { goog-partner-solution = "solution_urn" })
     }
 
     kms_key_self_link = try(local.boot_disk[0].kms_key_self_link, null)
@@ -560,7 +564,7 @@ resource "google_compute_instance" "node" {
   network_interface {
     network            = var.gcp_vpc_name
     subnetwork         = var.gcp_subnet_name
-    subnetwork_project = var.gcp_project
+    subnetwork_project = var.gcp_project_id
   }
 
   network_performance_config {
@@ -582,7 +586,7 @@ resource "google_compute_instance" "node" {
   }
 
   lifecycle {
-    ignore_changes = [attached_disk, boot_disk, machine_type, metadata_startup_script, name, network_interface, scratch_disk, labels, zone]
+    ignore_changes = [attached_disk, boot_disk, machine_type, metadata_startup_script, name, network_interface, scratch_disk, zone]
 
     precondition {
       condition     = local.check_cluster_remove_nodes == false
@@ -613,7 +617,7 @@ module "disks" {
     name = "${var.deployment_unique_name}-node-${count.index + 1}"
     zone = google_compute_instance.node[count.index].zone
   }
-  gcp_project = var.gcp_project
+  gcp_project_id = var.gcp_project_id
 
   labels = var.labels
 }

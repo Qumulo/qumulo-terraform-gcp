@@ -20,7 +20,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-variable "gcp_project" {
+variable "gcp_project_id" {
   description = "GCP project"
   type        = string
   nullable    = false

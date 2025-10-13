@@ -11,7 +11,7 @@
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.2 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 6.0 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | 6.48.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.1 |
 
@@ -22,7 +22,7 @@
 | <a name="input_bucket_count_override"></a> [bucket\_count\_override](#input\_bucket\_count\_override) | The number of buckets to deploy. If unset, the number of buckets is derived from the soft\_capacity\_limit variable. Requires dev\_environment=true. | `number` | `null` | no |
 | <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | Name for this Terraform deployment.  This name plus 11 random alphanumeric characters will be used for all resource names where appropriate. | `string` | n/a | yes |
 | <a name="input_dev_environment"></a> [dev\_environment](#input\_dev\_environment) | Disables some checks and restrictions. Leaves the provisioner running after the cluster is deployed. NOT recommended for production | `bool` | `false` | no |
-| <a name="input_gcp_project"></a> [gcp\_project](#input\_gcp\_project) | GCP project | `string` | n/a | yes |
+| <a name="input_gcp_project_id"></a> [gcp\_project\_id](#input\_gcp\_project\_id) | GCP project | `string` | n/a | yes |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | GCP region | `string` | n/a | yes |
 | <a name="input_labels"></a> [labels](#input\_labels) | OPTIONAL: Additional global labels | `map(string)` | `null` | no |
 | <a name="input_prevent_destroy"></a> [prevent\_destroy](#input\_prevent\_destroy) | Prevent the accidental destruction of non-empty buckets with Terraform. | `bool` | `true` | no |

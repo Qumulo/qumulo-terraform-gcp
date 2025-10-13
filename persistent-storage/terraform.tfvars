@@ -5,11 +5,11 @@
 deployment_name = "my-storage-deployment-name"
 
 # ***** GCP Variables *****
-# gcp_project                       - The GCP project for the deployment
+# gcp_project_id                    - The GCP project for the deployment
 # gcp_region                        - GCP region to deploy the cluster persistent storage buckets in.  For example us-west1 or us-east1.
 #                                     The GCP buckets deployed must be in the same region you plan to deploy the Qumulo cluster in.
-gcp_project = "my-project-name"
-gcp_region  = "us-west1"
+gcp_project_id = "my-project-name"
+gcp_region     = "us-west1"
 
 # ***** Qumulo Storage Variables *****
 # prevent_destroy                   - Prevent accidentally destroying non-empty buckets with Terraform.  If applied true, this must be set to false, applied, and then a destroy may be performed.

@@ -38,7 +38,7 @@ variable "labels" {
   type        = map(string)
   default     = null
 }
-variable "gcp_project" {
+variable "gcp_project_id" {
   description = "GCP project"
   type        = string
   nullable    = false

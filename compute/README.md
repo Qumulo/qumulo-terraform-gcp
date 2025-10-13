@@ -26,7 +26,7 @@
 | <a name="input_gce_image_name"></a> [gce\_image\_name](#input\_gce\_image\_name) | GCE Image Name | `string` | n/a | yes |
 | <a name="input_gce_ssh_public_key_path"></a> [gce\_ssh\_public\_key\_path](#input\_gce\_ssh\_public\_key\_path) | OPTIONAL: The local path to a file containing the public key which should be authorized to ssh into the Qumulo nodes | `string` | `null` | no |
 | <a name="input_gcp_cluster_custom_role"></a> [gcp\_cluster\_custom\_role](#input\_gcp\_cluster\_custom\_role) | OPTIONAL: Fully-qualified custom role name to use for cluster instances (e.g., projects/PROJECT\_ID/roles/ROLE\_ID). If set, the module will NOT create a custom role and will bind this role instead. | `string` | `null` | no |
-| <a name="input_gcp_project"></a> [gcp\_project](#input\_gcp\_project) | GCP project | `string` | n/a | yes |
+| <a name="input_gcp_project_id"></a> [gcp\_project\_id](#input\_gcp\_project\_id) | GCP project | `string` | n/a | yes |
 | <a name="input_gcp_provisioner_custom_role"></a> [gcp\_provisioner\_custom\_role](#input\_gcp\_provisioner\_custom\_role) | OPTIONAL: Fully-qualified custom role name to use for the provisioner instance (e.g., projects/PROJECT\_ID/roles/ROLE\_ID). If set, the module will NOT create a custom role and will bind this role instead. | `string` | `null` | no |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | GCP region | `string` | n/a | yes |
 | <a name="input_gcp_subnet_name"></a> [gcp\_subnet\_name](#input\_gcp\_subnet\_name) | GCP private subnet name | `string` | n/a | yes |
@@ -38,13 +38,13 @@
 | <a name="input_kms_key_name"></a> [kms\_key\_name](#input\_kms\_key\_name) | OPTIONAL: GCP KMS encryption key resource name (full path) | `string` | `null` | no |
 | <a name="input_labels"></a> [labels](#input\_labels) | OPTIONAL: Additional global labels | `map(string)` | `null` | no |
 | <a name="input_persistent_storage_output"></a> [persistent\_storage\_output](#input\_persistent\_storage\_output) | The output of the persistent storage module. | <pre>object({<br/>    bucket_names              = list(string)<br/>    bucket_region             = string<br/>    bucket_uris               = list(string)<br/>    deployment_unique_name    = string<br/>    prevent_destroy           = bool<br/>    soft_capacity_limit       = string<br/>    soft_capacity_limit_bytes = string<br/>  })</pre> | `null` | no |
-| <a name="input_q_boot_dkv_type"></a> [q\_boot\_dkv\_type](#input\_q\_boot\_dkv\_type) | OPTIONAL: Specify the type of Disk for the boot drive and dkv drives | `string` | `"hyperdisk-balanced"` | no |
+| <a name="input_q_boot_dkv_type"></a> [q\_boot\_dkv\_type](#input\_q\_boot\_dkv\_type) | OPTIONAL: Specify the type of Disk for the boot drive and dkv drives | `string` | `"pd-balanced"` | no |
 | <a name="input_q_boot_drive_size"></a> [q\_boot\_drive\_size](#input\_q\_boot\_drive\_size) | Size of the boot drive for each Qumulo Instance | `number` | `256` | no |
 | <a name="input_q_cluster_admin_password"></a> [q\_cluster\_admin\_password](#input\_q\_cluster\_admin\_password) | Qumulo cluster admin password | `string` | n/a | yes |
 | <a name="input_q_cluster_floating_ips"></a> [q\_cluster\_floating\_ips](#input\_q\_cluster\_floating\_ips) | The number of floating ips associated with the Qumulo cluster. | `number` | `12` | no |
 | <a name="input_q_cluster_fw_ingress_cidrs"></a> [q\_cluster\_fw\_ingress\_cidrs](#input\_q\_cluster\_fw\_ingress\_cidrs) | OPTIONAL: GCP additional firewall ingress CIDRs for the Qumulo cluster | `string` | `null` | no |
 | <a name="input_q_cluster_name"></a> [q\_cluster\_name](#input\_q\_cluster\_name) | Qumulo cluster name | `string` | `"CNQ"` | no |
-| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"7.6.0"` | no |
+| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"7.6.3.1"` | no |
 | <a name="input_q_debian_package"></a> [q\_debian\_package](#input\_q\_debian\_package) | Debian or RHL package | `bool` | `true` | no |
 | <a name="input_q_existing_deployment_unique_name"></a> [q\_existing\_deployment\_unique\_name](#input\_q\_existing\_deployment\_unique\_name) | OPTIONAL: The deployment\_unique\_name of the previous deployed cluster you want to replace | `string` | `null` | no |
 | <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo GCP compute engine instance type | `string` | `"z3-highmem-8-highlssd"` | no |

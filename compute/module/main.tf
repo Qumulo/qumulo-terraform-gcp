@@ -20,9 +20,11 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
+# **** Version 1.3 ****
+
 resource "null_resource" "project_lock" {
   triggers = {
-    deployment_project = var.gcp_project
+    deployment_project = var.gcp_project_id
   }
 
   lifecycle { ignore_changes = all }
@@ -170,7 +172,7 @@ module "secrets" {
   gcp_region             = local.deployment_region
   cluster_admin_password = var.q_cluster_admin_password
   deployment_unique_name = local.deployment_unique_name
-  gcp_project            = local.deployment_project
+  gcp_project_id         = local.deployment_project
 
   labels = var.labels
 }
@@ -197,7 +199,7 @@ module "qcluster" {
   gce_ssh_public_key_path                   = var.gce_ssh_public_key_path
   gcp_cluster_custom_role                   = var.gcp_cluster_custom_role
   gcp_number_azs                            = module.qconfig.number_azs
-  gcp_project                               = local.deployment_project
+  gcp_project_id                            = local.deployment_project
   gcp_project_number                        = data.google_project.project.number
   gcp_region                                = local.deployment_region
   gcp_subnet_name                           = var.gcp_subnet_name
@@ -240,7 +242,7 @@ module "qprovisioner" {
   count  = var.deploy_provisioner ? 1 : 0
   source = "./sub-modules/qprovisioner"
 
-  gcp_project                                       = local.deployment_project
+  gcp_project_id                                    = local.deployment_project
   gcp_project_number                                = data.google_project.project.number
   gcp_provisioner_custom_role                       = var.gcp_provisioner_custom_role
   gcp_region                                        = local.deployment_region

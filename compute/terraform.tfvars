@@ -13,14 +13,14 @@ gcs_bucket_prefix = "my-terraform/"
 gcs_bucket_region = "us-west1"
 
 # ***** GCP Variables *****
-# gcp_project                       - The GCP project for the deployment
+# gcp_project_id                    - The GCP project for the deployment
 # gcp_region                        - Region for the deployment of the cluster
 # gcp_zones                         - A zone within the region
 #                                     OR a comma delimited string of 3 zones, for a multi-AZ deployment
 # gcp_vpc_name                      - An existing VPC name for the deployment within the provided region
 # gcp_subnet_name                   - An existing GCP subnet to deploy the cluster in
 # term_protection                   - true/false to enable GCE termination protection.  This should be set to 'true' for production deployments.
-gcp_project     = "my-gcp-project"
+gcp_project_id  = "my-gcp-project"
 gcp_region      = "us-west1"
 gcp_zones       = "us-west1-a"
 gcp_vpc_name    = "my-vpc-name"
@@ -35,7 +35,7 @@ term_protection = true
 gce_image_name           = null
 q_cluster_admin_password = "My-password123!"
 q_cluster_name           = "CNQ"
-q_cluster_version        = "7.6.0"
+q_cluster_version        = "7.6.3.1"
 
 # ***** Qumulo Cluster Config Options *****
 # tf_persistent_storage_workspace   - Terraform workspace name (no path) for the persistent-storage deployment.  This is 'default' by default whether state is local or remote for Terraform.
@@ -82,4 +82,4 @@ q_existing_deployment_unique_name = null
 # q_cluster_floating_ips                - The number of floating IPs. Defaults to 12. Set to 0 to disable. Cannot be changed after initial deployment.
 kms_key_name               = null
 q_cluster_fw_ingress_cidrs = null
-q_cluster_floating_ips     = 0
+q_cluster_floating_ips     = 12
