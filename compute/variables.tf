@@ -206,11 +206,13 @@ variable "q_instance_type" {
       var.q_instance_type == "z3-highmem-14-standardlssd",
       var.q_instance_type == "z3-highmem-22-standardlssd",
       var.q_instance_type == "z3-highmem-44-standardlssd",
+      var.q_instance_type == "z3-highmem-88-standardlssd",      
       var.q_instance_type == "z3-highmem-8-highlssd",
       var.q_instance_type == "z3-highmem-16-highlssd",
       var.q_instance_type == "z3-highmem-22-highlssd",
       var.q_instance_type == "z3-highmem-32-highlssd",
       var.q_instance_type == "z3-highmem-44-highlssd",
+      var.q_instance_type == "z3-highmem-88-highlssd",      
       var.q_instance_type == "n2-highmem-8",
       var.q_instance_type == "n2-highmem-16",
       var.q_instance_type == "n2-highmem-32",
@@ -220,7 +222,7 @@ variable "q_instance_type" {
       var.q_instance_type == "n2d-highmem-32",
       var.q_instance_type == "n2d-highmem-48"
     ])
-    error_message = "Only z3-highmem, n2-highmem and n2d-highmem instance types are supported.  Must be >=z3-highmem-8-highlssd, >=z3-highmem-14-standardlssd, >=n2-highmem-8 or >=n2d-highmem-8."
+    error_message = "Only z3-highmem, n2-highmem and n2d-highmem instance types are supported.  Must be >=z3-highmem-8, >=n2-highmem-8 or >=n2d-highmem-8."
   }
 }
 variable "q_node_count" {

@@ -273,6 +273,21 @@ variable "gce_map" {
       nodeCap          = 5290
       netTier1         = true
     }
+    "z3-highmem-88-highlssd" = {
+      wcacheSlots      = 11
+      wcacheSize       = 20
+      wcacheIOPS_lt25  = 8060
+      wcacheTput_lt25  = 800
+      wcacheIOPS_gt24  = 8800
+      wcacheTput_gt24  = 870
+      wcacheRefillIOPs = 0
+      wcacheRefillBps  = 0
+      dkvSlots         = 4
+      dkvSize          = 4
+      rcacheSlots      = 0
+      nodeCap          = 8180
+      netTier1         = true
+    }    
     "z3-highmem-14-standardlssd" = {
       wcacheSlots      = 8
       wcacheSize       = 16
@@ -303,7 +318,7 @@ variable "gce_map" {
       nodeCap          = 2284
       netTier1         = false
     }
-    "z3-highmem-44-highlssd" = {
+    "z3-highmem-44-standardlssd" = {
       wcacheSlots      = 11
       wcacheSize       = 16
       wcacheIOPS_lt25  = 5060
@@ -318,6 +333,21 @@ variable "gce_map" {
       nodeCap          = 5290
       netTier1         = true
     }
+    "z3-highmem-88-standardlssd" = {
+      wcacheSlots      = 11
+      wcacheSize       = 20
+      wcacheIOPS_lt25  = 8060
+      wcacheTput_lt25  = 800
+      wcacheIOPS_gt24  = 8800
+      wcacheTput_gt24  = 870
+      wcacheRefillIOPs = 0
+      wcacheRefillBps  = 0
+      dkvSlots         = 4
+      dkvSize          = 4
+      rcacheSlots      = 0
+      nodeCap          = 8180
+      netTier1         = true
+    }      
     "n2-highmem-8" = {
       wcacheSlots      = 3
       wcacheSize       = 50
