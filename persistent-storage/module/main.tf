@@ -121,6 +121,13 @@ resource "google_storage_bucket" "cnq_bucket" {
     retention_duration_seconds = 0
   }
 
+  dynamic "logging" {
+    for_each = var.dev_environment && var.log_bucket != null ? [1]: []
+    logging {
+      log_bucket = var.log_bucket
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       # Ignore all properties except `force_destroy`
