@@ -182,9 +182,10 @@ class BaseNodeInitializer(ABC):
 
         def get_mac_address_from_metadata_service():
             try:
-                headers = {"Metadata-Flavor": "Google"}
-                response = urllib.request.urlopen("http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac", headers=headers)
-                return response.text.strip()
+                request = urllib.request.Request("http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac")
+                request.add_header("Metadata-Flavor", "Google")
+                with urllib.request.urlopen(request) as f:
+                    return f.read().decode('utf-8')
             except Exception as e:
                 self.logger.error(f"Failed to get MAC address from metadata service: {e}")
                 raise RuntimeError("Failed to get MAC address from metadata service")
