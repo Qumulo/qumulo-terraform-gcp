@@ -180,33 +180,33 @@ class BaseNodeInitializer(ABC):
         """
         self.logger.info("Setting up frontend interface tagging service...")
 
-        service_path = "/etc/systemd/system/qumulo-frontend-link-altname.service"
-
-        service_content = """[Unit]
-Description=Add altname for ens5
-
-[Service]
-ExecStart=/sbin/ip link property add dev ens5 altname qumulo-frontend1
-Type=oneshot
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-"""
+        def get_mac_address_from_metadata_service():
+            try:
+                headers = {"Metadata-Flavor": "Google"}
+                response = urllib.request.urlopen("http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac", headers=headers)
+                return response.text.strip()
+            except Exception as e:
+                self.logger.error(f"Failed to get MAC address from metadata service: {e}")
+                raise RuntimeError("Failed to get MAC address from metadata service")
 
         try:
-            # Write the service file
-            with open(service_path, 'w') as f:
-                f.write(service_content)
+            mac_address = get_mac_address_from_metadata_service()
+            link_content = f"""
+[Match]
+MACAddress={mac_address}
 
-            # Set proper permissions
-            os.chmod(service_path, 0o644)
-            self.logger.debug(f"Created service file: {service_path}")
+[Link]
+AlternativeName=qumulo-frontend1
+"""
 
-            # Reload systemd daemon and enable the service
-            self.run_command(["systemctl", "daemon-reload"])
-            self.run_command(["systemctl", "enable", "--now", "qumulo-frontend-link-altname.service"])
+            systemd_network = Path("/etc/systemd/network")
+            systemd_network.mkdir(parents=True, exist_ok=True)
+            link_unit = systemd_network / "10-qumulo-frontend-link-altname.link"
+            link_unit.write_text(link_content)
+            link_unit.chmod(0o644)
 
+            # Trigger a udev "add" event to force the altname to be aplied
+            self.run_command(["udevadm", "trigger", "--action=add", "timeout=60"])
             self.logger.info("✓ Frontend interface tagging service enabled")
 
         except Exception as e:
