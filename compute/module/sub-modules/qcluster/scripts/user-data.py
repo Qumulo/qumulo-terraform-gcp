@@ -207,7 +207,7 @@ AlternativeName=qumulo-frontend1
             link_unit.chmod(0o644)
 
             # Trigger a udev "add" event to force the altname to be aplied
-            self.run_command(["udevadm", "trigger", "--action=add", "timeout=60"])
+            self.run_command(["udevadm", "trigger", "--action=add"])
             self.logger.info("✓ Frontend interface tagging service enabled")
 
         except Exception as e:
