@@ -14,11 +14,11 @@ gcp_region     = "us-west1"
 # ***** Qumulo Storage Variables *****
 # prevent_destroy                   - Prevent accidentally destroying non-empty buckets with Terraform.  If applied true, this must be set to false, applied, and then a destroy may be performed.
 # soft_capacity_limit               - The capacity limit for all buckets combined.  Specified in TB, 500TB to 50000TB (50PB).  Default is 500TB.  You can always increase the soft limit in the future.
-prevent_destroy     = false
+prevent_destroy     = true
 soft_capacity_limit = 500
 
 # ***** Misc *****
 # labels                            - Additional lables to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
 #                                     If you add an additional label with the key 'name' it will be ignored.  All infrastructure is tagged with the 'name=deployment_unique_name'.
 #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-labels = { "department" = "se", "owner" = "dack", "purpose" = "tf-dev", "long_running" = "false" }
+labels = null
