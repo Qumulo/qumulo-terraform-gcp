@@ -54,6 +54,15 @@ variable "dev_environment" {
   type        = bool
   default     = false
 }
+variable "log_bucket" {
+  description = "The bucket that will receive usage logs and storage logs for the buckets. Requires dev_environment=true."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dev_environment || var.log_bucket == null
+    error_message = "Must set dev_environment=true to use log_bucket."
+  }
+}
 variable "prevent_destroy" {
   description = "Prevent the accidental destruction of non-empty buckets with Terraform."
   type        = bool
