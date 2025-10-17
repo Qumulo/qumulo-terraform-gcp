@@ -202,7 +202,7 @@ AlternativeName=qumulo-frontend1
 
             systemd_network = Path("/etc/systemd/network")
             systemd_network.mkdir(parents=True, exist_ok=True)
-            link_unit = systemd_network / "10-qumulo-frontend-link-altname.link"
+            link_unit = systemd_network / "05-qumulo-frontend-link-altname.link"
             link_unit.write_text(link_content)
             link_unit.chmod(0o644)
 
