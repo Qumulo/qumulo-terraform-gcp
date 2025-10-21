@@ -95,6 +95,22 @@ locals {
 
   #make list for availability zones
   gcp_zones = tolist(split(",", replace(var.gcp_zones, "/\\s*/", "")))
+
+  #get the state of Private Google Access for the subnet
+  gcp_subnet_private_access = data.google_compute_subnetwork.selected.private_ip_google_access
+}
+
+resource "null_resource" "private_google_access_is_false" {
+  # trigger on every terraform apply
+  triggers = {
+    always_run = timestamp()
+  }
+  lifecycle {
+    precondition {
+      condition     = local.gcp_subnet_private_access
+      error_message = "Private Google Access is required to avoid GCS egress charges for subnet=${data.google_compute_subnetwork.selected.name}. Please enable Private Google Access on the subnet."
+    }
+  }
 }
 
 resource "null_resource" "deploy_provisioner_is_false_in_dev_only" {

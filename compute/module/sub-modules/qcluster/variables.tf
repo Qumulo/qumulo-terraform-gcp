@@ -287,7 +287,7 @@ variable "gce_map" {
       rcacheSlots      = 0
       nodeCap          = 8180
       netTier1         = true
-    }    
+    }
     "z3-highmem-14-standardlssd" = {
       wcacheSlots      = 8
       wcacheSize       = 16
@@ -347,7 +347,7 @@ variable "gce_map" {
       rcacheSlots      = 0
       nodeCap          = 8180
       netTier1         = true
-    }      
+    }
     "n2-highmem-8" = {
       wcacheSlots      = 3
       wcacheSize       = 50
