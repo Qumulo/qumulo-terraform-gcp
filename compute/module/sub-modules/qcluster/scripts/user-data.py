@@ -66,7 +66,7 @@ class BaseNodeInitializer(ABC):
             ]
         )
 
-    def run_command(self, cmd, check=True, timeout=60):
+    def run_command(self, cmd, env=os.environ, check=True, timeout=60):
         """Execute a shell command with comprehensive error handling"""
         try:
             cmd_str = ' '.join(cmd) if isinstance(cmd, list) else cmd
@@ -80,8 +80,9 @@ class BaseNodeInitializer(ABC):
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                check=check
-            )
+                check=check,
+                env=env
+            )                
 
             if result.stdout:
                 self.logger.debug(f"Command output: {result.stdout.strip()}")
@@ -381,11 +382,14 @@ class DebianNodeInitializer(BaseNodeInitializer):
             self.logger.info(f"✓ {package_name} already installed")
             return
 
+        env_mod = os.environ.copy()
+        env_mod['DEBIAN_FRONTEND'] = 'noninteractive'
+
         # Install with retry logic
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                self.logger.info(f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})")
-                self.run_command(["apt-get", "install", "-y", package_name], timeout=300)
+                self.logger.info(f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})")         
+                self.run_command(["apt-get", "install", "-y", package_name], env=env_mod, timeout=300)
                 self.logger.info(f"✓ {package_name} installed successfully")
                 return
 
@@ -451,6 +455,7 @@ class DebianNodeInitializer(BaseNodeInitializer):
         packages = [
             "jq",
             "unzip",
+            "iperf3",
             "linux-tools-common",
             f"linux-tools-{kernel_release}",
             "systemd-container"
@@ -579,6 +584,7 @@ class RHELNodeInitializer(BaseNodeInitializer):
 
         packages = [
             "jq",
+            "iperf3",
             "systemd-container",
             "systemd-resolved",
             "unzip"
