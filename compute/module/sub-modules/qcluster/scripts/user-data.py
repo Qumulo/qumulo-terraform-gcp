@@ -455,7 +455,6 @@ class DebianNodeInitializer(BaseNodeInitializer):
         packages = [
             "jq",
             "unzip",
-            "iperf3",
             "linux-tools-common",
             f"linux-tools-{kernel_release}",
             "systemd-container"
@@ -584,7 +583,6 @@ class RHELNodeInitializer(BaseNodeInitializer):
 
         packages = [
             "jq",
-            "iperf3",
             "systemd-container",
             "systemd-resolved",
             "unzip"
