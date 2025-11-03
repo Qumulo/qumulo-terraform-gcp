@@ -550,14 +550,14 @@ resource "google_compute_instance" "node" {
     functions_gcs_prefix   = var.functions_gcs_prefix
   })
 
-  labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}" }, { goog-partner-solution = "solution_urn" })
+  labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}" }, { goog-partner-solution = "isol_plb32_0014m00001h36ntqay_f5vsyrhwimcgjy5wgrnbmghhviuu7czp" })
 
   boot_disk {
     initialize_params {
       image  = var.gce_image_name == null ? local.gce_image : var.gce_image_name
       size   = var.boot_drive_size
       type   = var.boot_dkv_type
-      labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}-boot-disk" }, { goog-partner-solution = "solution_urn" })
+      labels = merge(var.labels, { name = "${var.deployment_unique_name}-node-${count.index + 1}-boot-disk" }, { goog-partner-solution = "isol_plb32_0014m00001h36ntqay_f5vsyrhwimcgjy5wgrnbmghhviuu7czp" })
     }
 
     kms_key_self_link = try(local.boot_disk[0].kms_key_self_link, null)
