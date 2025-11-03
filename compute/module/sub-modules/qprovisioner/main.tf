@@ -412,14 +412,14 @@ resource "google_compute_instance" "provisioner" {
     dev_environment                           = var.dev_environment
   })
 
-  labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner" }, { goog-partner-solution = "solution_urn" })
+  labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner" }, { goog-partner-solution = "isol_plb32_0014m00001h36ntqay_f5vsyrhwimcgjy5wgrnbmghhviuu7czp" })
 
   boot_disk {
     initialize_params {
       image  = local.gce_image
       size   = 40
       type   = var.boot_type
-      labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner-boot-disk" }, { goog-partner-solution = "solution_urn" })
+      labels = merge(var.labels, { name = "${var.deployment_unique_name}-provisioner-boot-disk" }, { goog-partner-solution = "isol_plb32_0014m00001h36ntqay_f5vsyrhwimcgjy5wgrnbmghhviuu7czp" })
     }
 
     kms_key_self_link = try(local.boot_disk[0].kms_key_self_link, null)

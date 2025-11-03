@@ -111,7 +111,7 @@ resource "google_storage_bucket" "cnq_bucket" {
   storage_class               = "regional"
   uniform_bucket_level_access = true
 
-  labels = merge(var.labels, { name = "${random_string.bucket[count.index].id}-${local.deployment_unique_name}-qps-${count.index + 1}" }, { goog-partner-solution = "solution_urn" })
+  labels = merge(var.labels, { name = "${random_string.bucket[count.index].id}-${local.deployment_unique_name}-qps-${count.index + 1}" }, { goog-partner-solution = "isol_plb32_0014m00001h36ntqay_f5vsyrhwimcgjy5wgrnbmghhviuu7czp" })
 
   hierarchical_namespace {
     enabled = true

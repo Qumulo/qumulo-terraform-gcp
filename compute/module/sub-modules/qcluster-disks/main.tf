@@ -28,7 +28,7 @@ resource "google_compute_disk" "persistent_disk" {
   size    = var.devices[count.index].volume_size
   type    = var.devices[count.index].volume_type
   zone    = var.node.zone
-  labels  = merge(var.labels, { name = "${var.node.name}-${var.devices[count.index].volume_label}-${var.devices[count.index].device_name}" }, { goog-partner-solution = "solution_urn" })
+  labels  = merge(var.labels, { name = "${var.node.name}-${var.devices[count.index].volume_label}-${var.devices[count.index].device_name}" }, { goog-partner-solution = "isol_plb32_0014m00001h36ntqay_f5vsyrhwimcgjy5wgrnbmghhviuu7czp" })
   project = var.gcp_project_id
 
   provisioned_throughput = var.devices[count.index].volume_type == "pd-ssd" || var.devices[count.index].volume_type == "pd-balanced" ? null : var.devices[count.index].volume_tput
