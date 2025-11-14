@@ -252,7 +252,7 @@ def chkurl(url: str, no_sec: bool = False) -> bool:
         k = "k" if no_sec else ""
         cmd = f'curl -sL{k} -w "%%{{http_code}}\\n" "{url}" -o /dev/null --connect-timeout 10 --retry 3 --retry-delay 5 --max-time 60'
         result = run_command(cmd, timeout=70, check=False)
-        return result.stdout.strip() == "200"
+        return result.stdout.strip()=="200"
     except Exception:
         return False
 
@@ -480,11 +480,12 @@ def validate_connectivity(firestore: FirestoreManager) -> None:
     time.sleep(2)
 
     # Check to make sure the internet is reachable
-    if chkurl("https://google.com"):
+    if chkurl("https://microsoft.com"):
         firestore.update_status("BOOTED. Internet up.")
     else:
         firestore.update_status("BOOTED. Internet NOT reachable. NAT or VPC endpoints are required.")
-
+        raise ProvisioningError("Internet not reachable")
+    
     time.sleep(2)
 
 
