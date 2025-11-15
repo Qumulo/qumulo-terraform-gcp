@@ -131,32 +131,46 @@ class BaseNodeInitializer(ABC):
         """Validate network connectivity to required services"""
         self.logger.info("Checking network connectivity...")
 
-        # Test Google APIs connectivity
+        # Test Google APIs connectivity (with exponential backoff)
         self.logger.info("Testing Google APIs connectivity...")
-        try:
-            # Test Google APIs Discovery endpoint - returns proper HTTP 200
-            with urllib.request.urlopen("https://www.googleapis.com/discovery/v1/apis", timeout=CONNECTIVITY_TIMEOUT) as response:
-                if response.status == 200:
-                    self.logger.info("✓ Google APIs reachable")
-                else:
-                    self.logger.warning(f"Unexpected Google APIs response: {response.status}")
+        googleapis_url = "https://www.googleapis.com/discovery/v1/apis"
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                with urllib.request.urlopen(googleapis_url, timeout=CONNECTIVITY_TIMEOUT) as response:
+                    if response.status == 200:
+                        self.logger.info("✓ Google APIs reachable")
+                        break
+                    else:
+                        raise urllib.error.URLError(f"Unexpected Google APIs response: {response.status}")
+            except Exception as e:
+                if attempt == MAX_RETRIES:
+                    self.logger.error(f"Google APIs unreachable after {MAX_RETRIES} attempts: {e}")
+                    raise RuntimeError("Google APIs connectivity check failed") from e
+                delay = RETRY_DELAY * (2 ** (attempt - 1))
+                self.logger.warning(f"Google APIs check attempt {attempt} failed: {e}. Retrying in {delay}s...")
+                time.sleep(delay)
 
-        except Exception as e:
-            self.logger.error(f"Google APIs unreachable: {e}")
-            raise RuntimeError("Google APIs connectivity check failed")
-
-        # Test internet connectivity
+        # Test internet connectivity (with exponential backoff)
         self.logger.info("Testing internet connectivity...")
-        try:
-            with urllib.request.urlopen("https://google.com", timeout=CONNECTIVITY_TIMEOUT) as response:
-                if response.status == 200:
-                    self.logger.info("✓ Internet reachable")
-                else:
-                    self.logger.warning(f"Unexpected internet response: {response.status}")
-
-        except Exception as e:
-            self.logger.error(f"Internet unreachable: {e}")
-            raise RuntimeError("Internet connectivity check failed")
+        headers = {'User-Agent': 'Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36'}
+        req = urllib.request.Request("https://microsoft.com/", headers=headers)
+        last_error = None
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                with urllib.request.urlopen(req, timeout=CONNECTIVITY_TIMEOUT) as response:
+                    if response.status == 200:
+                        self.logger.info("✓ Internet reachable")
+                        break
+                    else:
+                        raise urllib.error.URLError(f"Unexpected internet response: {response.status}")
+            except Exception as e:
+                last_error = e
+                if attempt == MAX_RETRIES:
+                    self.logger.error(f"Internet unreachable after {MAX_RETRIES} attempts: {e}")
+                    raise RuntimeError("Internet connectivity check failed") from e
+                delay = RETRY_DELAY * (2 ** (attempt - 1))
+                self.logger.warning(f"Internet check attempt {attempt} failed: {e}. Retrying in {delay}s...")
+                time.sleep(delay)
 
     def verify_gcloud_cli(self):
         """Verify Google Cloud CLI is available and functional"""
