@@ -23,8 +23,6 @@ import os
 import subprocess
 import sys
 import time
-import urllib.request
-import urllib.error
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -82,7 +80,7 @@ class BaseNodeInitializer(ABC):
                 timeout=timeout,
                 check=check,
                 env=env
-            )                
+            )
 
             if result.stdout:
                 self.logger.debug(f"Command output: {result.stdout.strip()}")
@@ -127,50 +125,49 @@ class BaseNodeInitializer(ABC):
             self.logger.error(f"Failed to create first boot flag: {e}")
             raise
 
+    def chkurl(self, url, name):
+        """
+        Check URL availability using curl with retry logic.
+        Returns True if URL is reachable (HTTP 200), False otherwise.
+        """
+        try:
+            # Use curl with retry logic and proper timeouts
+            # Place -o before the URL so the response body does not go to stdout
+            cmd = [
+                "curl", "-sSL",
+                "-o", "/dev/null",
+                "-w", "%{http_code}\\n",
+                "--connect-timeout", "10",
+                "--retry", "3",
+                "--retry-delay", "5",
+                "--max-time", "60",
+                url
+            ]
+            result = self.run_command(cmd, timeout=70, check=False)
+            return result.stdout.strip() == "200"
+        except Exception as e:
+            self.logger.warning(f"URL check failed for {url}: {e}")
+            return False
+
     def check_connectivity(self):
         """Validate network connectivity to required services"""
         self.logger.info("Checking network connectivity...")
 
-        # Test Google APIs connectivity (with exponential backoff)
-        self.logger.info("Testing Google APIs connectivity...")
+        # Test Google APIs connectivity
         googleapis_url = "https://www.googleapis.com/discovery/v1/apis"
-        for attempt in range(1, MAX_RETRIES + 1):
-            try:
-                with urllib.request.urlopen(googleapis_url, timeout=CONNECTIVITY_TIMEOUT) as response:
-                    if response.status == 200:
-                        self.logger.info("✓ Google APIs reachable")
-                        break
-                    else:
-                        raise urllib.error.URLError(f"Unexpected Google APIs response: {response.status}")
-            except Exception as e:
-                if attempt == MAX_RETRIES:
-                    self.logger.error(f"Google APIs unreachable after {MAX_RETRIES} attempts: {e}")
-                    raise RuntimeError("Google APIs connectivity check failed") from e
-                delay = RETRY_DELAY * (2 ** (attempt - 1))
-                self.logger.warning(f"Google APIs check attempt {attempt} failed: {e}. Retrying in {delay}s...")
-                time.sleep(delay)
+        self.logger.info("Testing Google APIs connectivity...")
+        if not self.chkurl(googleapis_url, "Google APIs"):
+            self.logger.error("Google APIs unreachable after retries")
+            raise RuntimeError("Google APIs connectivity check failed")
+        self.logger.info("✓ Google APIs reachable")
 
-        # Test internet connectivity (with exponential backoff)
-        self.logger.info("Testing internet connectivity...")
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36'}
-        req = urllib.request.Request("https://microsoft.com/", headers=headers)
-        last_error = None
-        for attempt in range(1, MAX_RETRIES + 1):
-            try:
-                with urllib.request.urlopen(req, timeout=CONNECTIVITY_TIMEOUT) as response:
-                    if response.status == 200:
-                        self.logger.info("✓ Internet reachable")
-                        break
-                    else:
-                        raise urllib.error.URLError(f"Unexpected internet response: {response.status}")
-            except Exception as e:
-                last_error = e
-                if attempt == MAX_RETRIES:
-                    self.logger.error(f"Internet unreachable after {MAX_RETRIES} attempts: {e}")
-                    raise RuntimeError("Internet connectivity check failed") from e
-                delay = RETRY_DELAY * (2 ** (attempt - 1))
-                self.logger.warning(f"Internet check attempt {attempt} failed: {e}. Retrying in {delay}s...")
-                time.sleep(delay)
+        # Test internet connectivity
+        microsoft_url = "https://microsoft.com/"
+        self.logger.info("Testing Internet connectivity...")
+        if not self.chkurl(microsoft_url, "Internet"):
+            self.logger.error("Internet unreachable after retries")
+            raise RuntimeError("Internet connectivity check failed")
+        self.logger.info("✓ Internet reachable")
 
     def verify_gcloud_cli(self):
         """Verify Google Cloud CLI is available and functional"""
@@ -197,10 +194,14 @@ class BaseNodeInitializer(ABC):
 
         def get_mac_address_from_metadata_service():
             try:
-                request = urllib.request.Request("http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac")
-                request.add_header("Metadata-Flavor", "Google")
-                with urllib.request.urlopen(request) as f:
-                    return f.read().decode('utf-8')
+                # Use curl to get MAC address from metadata service
+                cmd = [
+                    "curl", "-sL",
+                    "-H", "Metadata-Flavor: Google",
+                    "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac"
+                ]
+                result = self.run_command(cmd)
+                return result.stdout.strip()
             except Exception as e:
                 self.logger.error(f"Failed to get MAC address from metadata service: {e}")
                 raise RuntimeError("Failed to get MAC address from metadata service")
@@ -402,7 +403,7 @@ class DebianNodeInitializer(BaseNodeInitializer):
         # Install with retry logic
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                self.logger.info(f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})")         
+                self.logger.info(f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})")
                 self.run_command(["apt-get", "install", "-y", package_name], env=env_mod, timeout=300)
                 self.logger.info(f"✓ {package_name} installed successfully")
                 return
