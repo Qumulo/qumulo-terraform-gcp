@@ -134,7 +134,7 @@ class BaseNodeInitializer(ABC):
             # Use curl with retry logic and proper timeouts
             # Place -o before the URL so the response body does not go to stdout
             cmd = [
-                "curl", "-sL",
+                "curl", "-sSL",
                 "-o", "/dev/null",
                 "-w", "%{http_code}\\n",
                 "--connect-timeout", "10",
