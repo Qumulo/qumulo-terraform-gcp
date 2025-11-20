@@ -274,6 +274,7 @@ module "qprovisioner" {
   cluster_fw_ingress_cidrs                          = var.q_cluster_fw_ingress_cidrs == null ? tolist([data.google_compute_subnetwork.selected.ip_cidr_range]) : concat([data.google_compute_subnetwork.selected.ip_cidr_range], tolist(split(",", replace(var.q_cluster_fw_ingress_cidrs, "/\\s*/", ""))))
   cluster_instance_ids                              = module.qcluster.instance_ids
   cluster_name                                      = var.q_cluster_name
+  cluster_nexus_registration_key                    = var.q_cluster_nexus_registration_key
   cluster_node1_ip                                  = module.qcluster.node1_ip
   cluster_persistent_bucket_names                   = local.persistent_storage_bucket_names
   cluster_persistent_bucket_uris                    = local.persistent_storage_bucket_uris

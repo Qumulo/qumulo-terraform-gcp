@@ -379,6 +379,7 @@ resource "google_compute_instance" "provisioner" {
   metadata_startup_script = templatefile("${var.scripts_path}provision.py", {
     bucket_name                               = var.gcs_bucket_name
     cluster_name                              = var.cluster_name
+    cluster_nexus_registration_key            = var.cluster_nexus_registration_key
     cluster_persistent_bucket_names           = join(",", var.cluster_persistent_bucket_names)
     cluster_persistent_bucket_uris            = join(",", var.cluster_persistent_bucket_uris)
     cluster_persistent_storage_capacity_limit = var.cluster_persistent_storage_capacity_limit

@@ -85,6 +85,10 @@ variable "cluster_name" {
   description = "Qumulo cluster name"
   type        = string
 }
+variable "cluster_nexus_registration_key" {
+  description = "Qumulo Nexus Registration Key"
+  type        = string
+}
 variable "cluster_node1_ip" {
   description = "Primary IP for Node 1"
   type        = string
