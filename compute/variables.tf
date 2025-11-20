@@ -137,6 +137,13 @@ variable "q_cluster_admin_password" {
     error_message = "The q_cluster_admin_password must be at least 8 characters and contain an uppercase, lowercase, number, and special character."
   }
 }
+variable "q_cluster_nexus_registration_key" {
+  description = "Qumulo Nexus Registration Key"
+  type        = string
+  sensitive   = true
+  nullable    = false
+  default     = ""
+}
 variable "q_cluster_floating_ips" {
   description = "The number of floating ips associated with the Qumulo cluster."
   type        = number

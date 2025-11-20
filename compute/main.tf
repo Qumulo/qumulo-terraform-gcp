@@ -46,6 +46,7 @@ module "compute" {
   q_boot_dkv_type                   = var.q_boot_dkv_type
   q_boot_drive_size                 = var.q_boot_drive_size
   q_cluster_admin_password          = var.q_cluster_admin_password
+  q_cluster_nexus_registration_key  = var.q_cluster_nexus_registration_key
   q_cluster_floating_ips            = var.q_cluster_floating_ips
   q_cluster_fw_ingress_cidrs        = var.q_cluster_fw_ingress_cidrs
   q_cluster_name                    = var.q_cluster_name

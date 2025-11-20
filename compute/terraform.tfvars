@@ -37,6 +37,13 @@ q_cluster_admin_password = "My-password123!"
 q_cluster_name           = "CNQ"
 q_cluster_version        = "7.6.3.1"
 
+#
+# You can obtain your unique Nexus Registration key at https://nexus.qumulo.com/user/registration-key
+# Learn more about this feature at https://docs.qumulo.com/qumulo-nexus-configuration-guide/creating-registration-key-nexus-remote-support.html
+#
+
+q_cluster_nexus_registration_key = null
+
 # ***** Qumulo Cluster Config Options *****
 # tf_persistent_storage_workspace   - Terraform workspace name (no path) for the persistent-storage deployment.  This is 'default' by default whether state is local or remote for Terraform.
 #                                     A reasonable default configuration for the provider.tf files is provided and should be reviewed/modified prior to Terraform init.

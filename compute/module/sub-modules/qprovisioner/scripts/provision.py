@@ -53,6 +53,7 @@ class ProvisioningConfig:
     """
     # Core cluster settings
     cluster_name: str
+    cluster_nexus_registration_key: str
     admin_password: str
 
     # GCP infrastructure settings
@@ -139,6 +140,7 @@ def create_provisioning_config() -> ProvisioningConfig:
     return ProvisioningConfig(
         # Core cluster settings
         cluster_name="${cluster_name}",
+        cluster_nexus_registration_key="${cluster_nexus_registration_key}",
         admin_password="${temporary_password}",
 
         # GCP infrastructure
@@ -882,6 +884,10 @@ def create_new_cluster(config: ProvisioningConfig, firestore: FirestoreManager, 
 
     # Apply floating IPs
     apply_initial_floating_ips(config, qq_host, firestore)
+
+    # Configure Nexus registration key if provided
+    if config.cluster_nexus_registration_key:
+        qq_command(f"set_monitoring_conf --nexus-registration-key {config.cluster_nexus_registration_key}", qq_host)
 
     # Change to actual admin password
     qq_command(f"change_password -o {config.def_password} -p {admin_password}", qq_host)
