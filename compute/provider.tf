@@ -29,39 +29,50 @@ provider "google" {
   region = var.gcs_bucket_region
 }
 
-# Comment out this block if you want to use a local backend
-# Below is an example for storing state on GCS for this Terraform deployment.
-# You cannot put variables in the backend resource below.
-# Whatever you choose to do, the persistent-storage/provider.tf and this compute/provider.tf must point to the correct bucket/path where you are storing state.
-# State for the two modules MUST be separate.  You need only specify a bucket below.
-terraform {
-  backend "gcs" {
-    bucket = "my-bucket"
-    prefix = "tf-state/compute"
-  }
-}
+# =============================================================================
+# REMOTE STATE CONFIGURATION (Persistent Storage State)
+# =============================================================================
+# This reads the persistent storage state from your persistent-storage deployment
+#
+# IMPORTANT: Configure the tf_persistent_storage_backend_* variables in terraform.tfvars
+# to match your persistent-storage backend configuration.
+#
+# Set tf_persistent_storage_backend_type = "gcs" for GCS backend (default)
+# Set tf_persistent_storage_backend_type = "local" for local backend
+#
+# For module use: The calling module can pass tf_persistent_storage_backend_*
+# variables to configure the backend.
 
-#Comment out this block if you are using a local backend
-#You MUST specify the same bucket below as you specified for the backend above.
-#You MUST specify the same prefix as configured in the persistent-storage/provider.tf
-data "terraform_remote_state" "persistent_storage" {
+# -----------------------------------------------------------------------------
+# GCS Backend for Persistent Storage State
+# -----------------------------------------------------------------------------
+data "terraform_remote_state" "persistent_storage_gcs" {
+  count = var.tf_persistent_storage_backend_type == "gcs" ? 1 : 0
+
   backend = "gcs"
 
   config = {
-    bucket = "my-bucket"
-    prefix = "tf-state/persistent-storage"
+    bucket = var.tf_persistent_storage_backend_bucket
+    prefix = var.tf_persistent_storage_backend_prefix
   }
 
   workspace = var.tf_persistent_storage_workspace
 }
 
-#Uncomment this block if you are using a local backend
-#If you are storing state locally - not recommended for production - here's an example of how to setup the data source for persistent-storage
-#data "terraform_remote_state" "persistent_storage" {
-#  backend = "local"
-#
-#  config = {
-#    path = "../persistent-storage/terraform.tfstate"
-#  }
-#}
-#
+# -----------------------------------------------------------------------------
+# Local Backend for Persistent Storage State
+# -----------------------------------------------------------------------------
+data "terraform_remote_state" "persistent_storage_local" {
+  count = var.tf_persistent_storage_backend_type == "local" ? 1 : 0
+
+  backend = "local"
+
+  config = {
+    path = var.tf_persistent_storage_backend_local_path
+  }
+}
+
+# Local to select which data source to use
+locals {
+  persistent_storage_output = var.tf_persistent_storage_backend_type == "gcs" ? data.terraform_remote_state.persistent_storage_gcs[0].outputs : data.terraform_remote_state.persistent_storage_local[0].outputs
+}

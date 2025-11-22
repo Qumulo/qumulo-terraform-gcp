@@ -33,10 +33,10 @@ content: |-
   ---
   
   ### Terraform state management
-  By default the `provider.tf` files in each module are configured to write state to GCS.  It is absolutely critical that the state for each module is in a separate Terraform state file.
-  If deploying the modules as packaged and using the `terraform.tfvars` file you need only configure the bucket for GCS state storage in each `provider.tf`.  
+  By default the `backend.tf` files in each module are configured to write state to GCS.  It is absolutely critical that the state for each module is in a separate Terraform state file.
+  If deploying the modules as packaged and using the `terraform.tfvars` file you need to configure the bucket for GCS state storage in each `backend.tf` and specify that same bucket in the tf_persistent_storage_backed_bucket tfvar.  
   Terraform will then create a 'tfstate' folder with unique subfolders for the state files for persistent-storage and compute.  This must be done prior to `terraform init`.  
-  If you are integrating this into your own CI/CD pipeline and calling the modules directly ensure that state is managed independently for both modules.
+  If you are integrating this into your own CI/CD pipeline and calling the modules directly ensure that state is managed independently for both modules, as the `backend.tf` will be ignored.
 
   ---
   

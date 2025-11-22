@@ -35,27 +35,30 @@ term_protection = true
 gce_image_name           = null
 q_cluster_admin_password = "My-password123!"
 q_cluster_name           = "CNQ"
-q_cluster_version        = "7.6.3.1"
-
-#
-# You can obtain your unique Nexus Registration key at https://nexus.qumulo.com/user/registration-key
-# Learn more about this feature at https://docs.qumulo.com/qumulo-nexus-configuration-guide/creating-registration-key-nexus-remote-support.html
-#
-
-q_cluster_nexus_registration_key = null
+q_cluster_version        = "7.7.1"
 
 # ***** Qumulo Cluster Config Options *****
-# tf_persistent_storage_workspace   - Terraform workspace name (no path) for the persistent-storage deployment.  This is 'default' by default whether state is local or remote for Terraform.
-#                                     A reasonable default configuration for the provider.tf files is provided and should be reviewed/modified prior to Terraform init.
 # q_persistent_storage_type         - CNQ Hot uses hot_gcs_std.  CNQ Cold is not yet supported.
 # q_instance_type                   - >= z3-highmem-8-highlssd, >= z3-highmem-14-standardlssd, >= n2-highmem-8 or >= n2d-highmem-8.
 # q_node_count                      - Total # GCE Instances in the cluster 3 to 24, or 1.
 #                                     Increase this number to expand the cluster by adding nodes.
 #                                     Decrease this number to destroy unused resources AFTER doing a Terraform apply with q_target_node_count to statefully remove node(s) from the cluster.
-tf_persistent_storage_workspace = "default"
 q_persistent_storage_type       = "hot_gcs_std"
 q_instance_type                 = "z3-highmem-8-highlssd"
 q_node_count                    = 3
+
+# ***** Persistent Storage Backend Configuration (for terraform_remote_state) *****
+# tf_persistent_storage_backend_type                 - Backend type for persistent-storage state: 'gcs' or 'local'. Default is 'gcs'.
+# tf_persistent_storage_workspace                    - Terraform workspace name (no path) for the persistent-storage deployment.  This is 'default' by default whether state is local or remote for Terraform.
+#                                                      A reasonable default configuration for the provider.tf files is provided and should be reviewed/modified prior to Terraform init.
+# tf_persistent_storage_backend_bucket               - GCS bucket name for the persistent-storage Terraform state backend. Must match your persistent-storage/backend.tf bucket value (required if backend_type = "gcs").
+# tf_persistent_storage_backend_prefix               - GCS prefix path for the persistent-storage Terraform state backend. Must match your persistent-storage/backend.tf key value (required if backend_type = "gcs").
+# tf_persistent_storage_backend_local_path           - Local file path for the persistent-storage Terraform state backend (required if backend_type = "local").
+tf_persistent_storage_backend_type       = "gcs"
+tf_persistent_storage_workspace          = "default"
+tf_persistent_storage_backend_bucket     = "my-bucket"
+tf_persistent_storage_backend_prefix     = "tf-state/persistent-storage"
+tf_persistent_storage_backend_local_path = "../persistent-storage/terraform.tfstate"
 
 # ****************************** Optional **************************************************************
 # ***** Environment and Tag Options *****
@@ -90,3 +93,7 @@ q_existing_deployment_unique_name = null
 kms_key_name               = null
 q_cluster_fw_ingress_cidrs = null
 q_cluster_floating_ips     = 12
+
+# You can obtain your unique Nexus Registration key at https://nexus.qumulo.com/user/registration-key
+# Learn more about this feature at https://docs.qumulo.com/qumulo-nexus-configuration-guide/creating-registration-key-nexus-remote-support.html
+q_cluster_nexus_registration_key = null

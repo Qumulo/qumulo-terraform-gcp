@@ -20,10 +20,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
-locals {
-  persistent_storage = data.terraform_remote_state.persistent_storage.outputs.outputs_persistent_storage
-}
-
 module "compute" {
   source = "./module/"
 
@@ -46,10 +42,10 @@ module "compute" {
   q_boot_dkv_type                   = var.q_boot_dkv_type
   q_boot_drive_size                 = var.q_boot_drive_size
   q_cluster_admin_password          = var.q_cluster_admin_password
-  q_cluster_nexus_registration_key  = var.q_cluster_nexus_registration_key
   q_cluster_floating_ips            = var.q_cluster_floating_ips
   q_cluster_fw_ingress_cidrs        = var.q_cluster_fw_ingress_cidrs
   q_cluster_name                    = var.q_cluster_name
+  q_cluster_nexus_registration_key  = var.q_cluster_nexus_registration_key
   q_cluster_version                 = var.q_cluster_version
   q_debian_package                  = var.q_debian_package
   q_existing_deployment_unique_name = var.q_existing_deployment_unique_name
@@ -65,7 +61,7 @@ module "compute" {
   term_protection                   = var.term_protection
   labels                            = var.labels
 
-  persistent_storage_output = local.persistent_storage
+  persistent_storage_output = local.persistent_storage_output.outputs_persistent_storage
 
   providers = {
     google.bucket = google.bucket

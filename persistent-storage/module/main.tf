@@ -122,7 +122,7 @@ resource "google_storage_bucket" "cnq_bucket" {
   }
 
   dynamic "logging" {
-    for_each = var.dev_environment && var.log_bucket != null ? [1]: []
+    for_each = var.dev_environment && var.log_bucket != null ? [1] : []
     content {
       log_bucket = var.log_bucket
     }

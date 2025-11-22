@@ -25,14 +25,3 @@ provider "google" {
   region  = var.gcp_region
 }
 
-# Comment out this block if you want to use a local backend
-# Below is an example for storing state on GCS for this Terraform deployment.
-# You cannot put variables in the backend resource below.
-# Whatever you choose to do, the compute/provider.tf and this persistent-storage/provider.tf must point to the correct bucket/path where you are storing state.
-# State for the two modules MUST be separate.  You need only specify a bucket below.
-terraform {
-  backend "gcs" {
-    bucket = "my-bucket"
-    prefix = "tf-state/persistent-storage"
-  }
-}
