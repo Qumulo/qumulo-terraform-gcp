@@ -39,11 +39,6 @@ locals {
       protocol    = "tcp"
     },
     {
-      port        = 80
-      description = "TCP ports for HTTP"
-      protocol    = "tcp"
-    },
-    {
       port        = 443
       description = "TCP ports for HTTPS"
       protocol    = "tcp"
@@ -293,6 +288,19 @@ resource "google_firestore_document" "floating-ip-count" {
   document_id = "floating-ip-count"
   fields = jsonencode({
     floating-ip-count = {
+      stringValue = "null"
+    }
+  })
+  lifecycle { ignore_changes = [fields] }
+}
+
+resource "google_firestore_document" "compression-efficiency-pct" {
+  project     = var.gcp_project_id
+  collection  = var.deployment_unique_name
+  database    = var.cluster_persistent_storage_deployment_unique_name
+  document_id = "compression-efficiency-pct"
+  fields = jsonencode({
+    compression-efficiency-pct = {
       stringValue = "null"
     }
   })

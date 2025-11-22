@@ -1210,6 +1210,39 @@ def update_capacity_limit(config: ProvisioningConfig, firestore: FirestoreManage
 
     firestore.put("soft-capacity-limit", str(config.capacity_limit))
 
+def update_compression_efficiency(firestore: FirestoreManager, qq_host: str) -> None:
+    """
+    Fetch on-disk bytes and used capacity; compute compression efficiency percentage.
+    """
+    # Get stats and extract on_disk_bytes and used blocks with jq
+    result1 = qq_command("raw GET /v1/compression/stats", qq_host)
+    with open("compression_stats.json", "w") as f:
+        f.write(result1.stdout)
+
+    on_disk_proc = run_command("jq -r '.total.on_disk_bytes' compression_stats.json", check=False)
+    try:
+        on_disk_bytes = int((on_disk_proc.stdout or "").strip())
+    except Exception:
+        on_disk_bytes = 0
+
+    used_block_proc = run_command("jq -r '.total.block_count' compression_stats.json", check=False)
+    try:
+        used_bytes = int((used_block_proc.stdout or "").strip()) * 4096
+    except Exception:
+        used_bytes = 0
+
+    # Compute efficiency: (1 - on_disk / used) * 100
+    efficiency_pct = 0.0
+    if used_bytes > 0:
+        efficiency_pct = max(0.0, (1.0 - (float(on_disk_bytes) / float(used_bytes))) * 100.0)
+
+    # Write Firestore metric
+    firestore.put("compression-efficiency-pct", f"{efficiency_pct:.2f}")
+
+    logging.info(
+        f"Compression efficiency: {efficiency_pct:.2f}% "
+        f"(on_disk_bytes={on_disk_bytes}, used_bytes={used_bytes})"
+    )
 
 def update_instance_labels(config: ProvisioningConfig) -> None:
     """Update GCP instance labels with node IDs"""
@@ -1279,9 +1312,9 @@ def execute_cluster_operations(config: ProvisioningConfig, firestore: FirestoreM
         logging.info("EXECUTING: Add storage buckets")
         add_object_buckets(config, firestore, qq_host)
 
-    # Always update instance labels at the end
-    update_instance_labels(config)
-
+    # Always update instance labels and compression efficiency at the end
+    update_instance_labels(config) 
+    update_compression_efficiency(firestore, qq_host)
 
 ################################################################################
 #                       MAIN ENTRY POINT                                       #
