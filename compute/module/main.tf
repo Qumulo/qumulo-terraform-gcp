@@ -20,7 +20,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
-# **** Version 1.9 ****
+# **** Version 2.0 ****
 
 resource "null_resource" "project_lock" {
   triggers = {

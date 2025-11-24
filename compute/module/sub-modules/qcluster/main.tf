@@ -341,11 +341,6 @@ locals {
       protocol    = "tcp"
     },
     {
-      port        = 80
-      description = "TCP ports for HTTP"
-      protocol    = "tcp"
-    },
-    {
       port        = 111
       description = "TCP ports for SUNRPC"
       protocol    = "tcp"
@@ -379,7 +374,7 @@ locals {
       port        = 5201
       description = "TCP ports for IPERF3"
       protocol    = "tcp"
-    },    
+    },
     {
       port        = 8000
       description = "TCP ports for REST"
@@ -404,7 +399,7 @@ locals {
       port        = 5201
       description = "UDP ports for IPERF3"
       protocol    = "udp"
-    }    
+    }
   ]
 }
 # Check the capacity constraint and throw an error if a larger instance type is required

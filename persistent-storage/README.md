@@ -10,7 +10,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.2 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.11.0 |
 | <a name="requirement_google"></a> [google](#requirement\_google) | 6.48.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.1 |
@@ -25,6 +25,7 @@
 | <a name="input_gcp_project_id"></a> [gcp\_project\_id](#input\_gcp\_project\_id) | GCP project | `string` | n/a | yes |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | GCP region | `string` | n/a | yes |
 | <a name="input_labels"></a> [labels](#input\_labels) | OPTIONAL: Additional global labels | `map(string)` | `null` | no |
+| <a name="input_log_bucket"></a> [log\_bucket](#input\_log\_bucket) | The bucket that will receive usage logs and storage logs for the buckets. Requires dev\_environment=true. | `string` | `null` | no |
 | <a name="input_prevent_destroy"></a> [prevent\_destroy](#input\_prevent\_destroy) | Prevent the accidental destruction of non-empty buckets with Terraform. | `bool` | `true` | no |
 | <a name="input_soft_capacity_limit"></a> [soft\_capacity\_limit](#input\_soft\_capacity\_limit) | Soft capacity limit for all buckets combined: 50TB to 50000TB (50PB). | `number` | `500` | no |
 

@@ -322,6 +322,34 @@ variable "tf_persistent_storage_workspace" {
   default     = "default"
   nullable    = false
 }
+variable "tf_persistent_storage_backend_type" {
+  description = "Backend type for persistent-storage state: 'gcs' or 'local'. Default is 'gcs'"
+  type        = string
+  default     = "gcs"
+  nullable    = false
+  validation {
+    condition     = contains(["gcs", "local"], var.tf_persistent_storage_backend_type)
+    error_message = "Backend type must be 'gcs' or 'local'"
+  }
+}
+variable "tf_persistent_storage_backend_bucket" {
+  description = "GCS bucket name for the persistent-storage Terraform state backend"
+  type        = string
+  default     = null
+  nullable    = true
+}
+variable "tf_persistent_storage_backend_prefix" {
+  description = "GCS prefix path for the persistent-storage Terraform state backend"
+  type        = string
+  default     = null
+  nullable    = true
+}
+variable "tf_persistent_storage_backend_local_path" {
+  description = "Local file path for the persistent-storage Terraform state backend (only used when using local backend)"
+  type        = string
+  default     = null
+  nullable    = true
+}
 variable "labels" {
   description = "OPTIONAL: Additional global labels"
   type        = map(string)
