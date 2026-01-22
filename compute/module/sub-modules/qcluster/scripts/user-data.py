@@ -23,6 +23,8 @@ import os
 import subprocess
 import sys
 import time
+import urllib.request
+import urllib.error
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -64,7 +66,7 @@ class BaseNodeInitializer(ABC):
             ]
         )
 
-    def run_command(self, cmd, env=os.environ, check=True, timeout=60):
+    def run_command(self, cmd, check=True, timeout=60):
         """Execute a shell command with comprehensive error handling"""
         try:
             cmd_str = ' '.join(cmd) if isinstance(cmd, list) else cmd
@@ -78,8 +80,7 @@ class BaseNodeInitializer(ABC):
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                check=check,
-                env=env
+                check=check
             )
 
             if result.stdout:
@@ -125,49 +126,36 @@ class BaseNodeInitializer(ABC):
             self.logger.error(f"Failed to create first boot flag: {e}")
             raise
 
-    def chkurl(self, url, name):
-        """
-        Check URL availability using curl with retry logic.
-        Returns True if URL is reachable (HTTP 200), False otherwise.
-        """
-        try:
-            # Use curl with retry logic and proper timeouts
-            # Place -o before the URL so the response body does not go to stdout
-            cmd = [
-                "curl", "-sSL",
-                "-o", "/dev/null",
-                "-w", "%{http_code}\\n",
-                "--connect-timeout", "10",
-                "--retry", "3",
-                "--retry-delay", "5",
-                "--max-time", "60",
-                url
-            ]
-            result = self.run_command(cmd, timeout=70, check=False)
-            return result.stdout.strip() == "200"
-        except Exception as e:
-            self.logger.warning(f"URL check failed for {url}: {e}")
-            return False
-
     def check_connectivity(self):
         """Validate network connectivity to required services"""
         self.logger.info("Checking network connectivity...")
 
         # Test Google APIs connectivity
-        googleapis_url = "https://www.googleapis.com/discovery/v1/apis"
         self.logger.info("Testing Google APIs connectivity...")
-        if not self.chkurl(googleapis_url, "Google APIs"):
-            self.logger.error("Google APIs unreachable after retries")
+        try:
+            # Test Google APIs Discovery endpoint - returns proper HTTP 200
+            with urllib.request.urlopen("https://www.googleapis.com/discovery/v1/apis", timeout=CONNECTIVITY_TIMEOUT) as response:
+                if response.status == 200:
+                    self.logger.info("✓ Google APIs reachable")
+                else:
+                    self.logger.warning(f"Unexpected Google APIs response: {response.status}")
+
+        except Exception as e:
+            self.logger.error(f"Google APIs unreachable: {e}")
             raise RuntimeError("Google APIs connectivity check failed")
-        self.logger.info("✓ Google APIs reachable")
 
         # Test internet connectivity
-        microsoft_url = "https://microsoft.com/"
-        self.logger.info("Testing Internet connectivity...")
-        if not self.chkurl(microsoft_url, "Internet"):
-            self.logger.error("Internet unreachable after retries")
+        self.logger.info("Testing internet connectivity...")
+        try:
+            with urllib.request.urlopen("https://google.com", timeout=CONNECTIVITY_TIMEOUT) as response:
+                if response.status == 200:
+                    self.logger.info("✓ Internet reachable")
+                else:
+                    self.logger.warning(f"Unexpected internet response: {response.status}")
+
+        except Exception as e:
+            self.logger.error(f"Internet unreachable: {e}")
             raise RuntimeError("Internet connectivity check failed")
-        self.logger.info("✓ Internet reachable")
 
     def verify_gcloud_cli(self):
         """Verify Google Cloud CLI is available and functional"""
@@ -192,38 +180,33 @@ class BaseNodeInitializer(ABC):
         """
         self.logger.info("Setting up frontend interface tagging service...")
 
-        def get_mac_address_from_metadata_service():
-            try:
-                # Use curl to get MAC address from metadata service
-                cmd = [
-                    "curl", "-sL",
-                    "-H", "Metadata-Flavor: Google",
-                    "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac"
-                ]
-                result = self.run_command(cmd)
-                return result.stdout.strip()
-            except Exception as e:
-                self.logger.error(f"Failed to get MAC address from metadata service: {e}")
-                raise RuntimeError("Failed to get MAC address from metadata service")
+        service_path = "/etc/systemd/system/qumulo-frontend-link-altname.service"
 
-        try:
-            mac_address = get_mac_address_from_metadata_service()
-            link_content = f"""
-[Match]
-MACAddress={mac_address}
+        service_content = """[Unit]
+Description=Add altname for ens5
 
-[Link]
-AlternativeName=qumulo-frontend1
+[Service]
+ExecStart=/sbin/ip link property add dev ens5 altname qumulo-frontend1
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
 """
 
-            systemd_network = Path("/etc/systemd/network")
-            systemd_network.mkdir(parents=True, exist_ok=True)
-            link_unit = systemd_network / "05-qumulo-frontend-link-altname.link"
-            link_unit.write_text(link_content)
-            link_unit.chmod(0o644)
+        try:
+            # Write the service file
+            with open(service_path, 'w') as f:
+                f.write(service_content)
 
-            # Trigger a udev "add" event to force the altname to be aplied
-            self.run_command(["udevadm", "trigger", "--action=add"])
+            # Set proper permissions
+            os.chmod(service_path, 0o644)
+            self.logger.debug(f"Created service file: {service_path}")
+
+            # Reload systemd daemon and enable the service
+            self.run_command(["systemctl", "daemon-reload"])
+            self.run_command(["systemctl", "enable", "--now", "qumulo-frontend-link-altname.service"])
+
             self.logger.info("✓ Frontend interface tagging service enabled")
 
         except Exception as e:
@@ -317,15 +300,36 @@ AlternativeName=qumulo-frontend1
             os.chdir("/root")
             self.logger.info("Working directory: /root")
 
+            # RHEL/GCP: stop NetworkManager and silence the Guest Agent early
+            if self.os_info.is_rhel_based:
+                self.configure_google_guest_agent()
+
             # Execute initialization steps
-            self.check_connectivity()
+            # self.check_connectivity()
             self.uninstall_undesired_packages()
             self.install_required_packages()
-            self.configure_system_services()
-            self.verify_gcloud_cli()
 
-            # Enable frontend interface tagging service for floating IPs support
-            self.enable_frontend_interface_service()
+            if self.os_info.is_rhel_based:
+                # Ensure the frontend interface name exists before configuring networkd match rules
+                self.enable_frontend_interface_service()
+
+                # RHEL/GCP: ensure DHCP renewals use MAC identity and start networkd live
+                if hasattr(self, "configure_networkd_client_id"):
+                    self.configure_networkd_client_id()
+
+                # RHEL/GCP: only stop NetworkManager after networkd is configured/enabled
+                self.run_command(["systemctl", "stop", "NetworkManager"], check=False)
+                
+                # Finalize system services (includes NetworkManager removal on RHEL)
+                self.configure_system_services()
+                self.verify_gcloud_cli()
+                self.check_connectivity() 
+            else:
+                self.configure_system_services()
+                self.verify_gcloud_cli()
+
+                # Enable frontend interface tagging service for floating IPs support
+                self.enable_frontend_interface_service()
 
             # Install Qumulo Core if requested
             if install_qumulo_package == "true":
@@ -397,14 +401,11 @@ class DebianNodeInitializer(BaseNodeInitializer):
             self.logger.info(f"✓ {package_name} already installed")
             return
 
-        env_mod = os.environ.copy()
-        env_mod['DEBIAN_FRONTEND'] = 'noninteractive'
-
         # Install with retry logic
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 self.logger.info(f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})")
-                self.run_command(["apt-get", "install", "-y", package_name], env=env_mod, timeout=300)
+                self.run_command(["apt-get", "install", "-y", package_name], timeout=300)
                 self.logger.info(f"✓ {package_name} installed successfully")
                 return
 
@@ -575,18 +576,31 @@ class RHELNodeInitializer(BaseNodeInitializer):
         """Setup required repositories for RHEL/Rocky systems"""
         self.logger.info("Setting up RHEL/Rocky repositories...")
 
-        # Check if this is RHEL (not Rocky/CentOS)
         try:
-            with open('/etc/os-release', 'r') as f:
-                os_release_content = f.read()
+            # Enable CodeReady Builder (CRB). On GCP RHEL 9 images, the repo name is long-form.
+            # Using check=False lets us try both names safely across RHEL/Rocky variants.
+            self.run_command(
+                [self.os_info.package_manager, "-y", "config-manager", "--set-enabled", "crb"],
+                check=False,
+                timeout=300,
+            )
+            self.run_command(
+                [
+                    self.os_info.package_manager,
+                    "-y",
+                    "config-manager",
+                    "--set-enabled",
+                    "rhui-codeready-builder-for-rhel-9-x86_64-rhui-rpms",
+                ],
+                check=False,
+                timeout=300,
+            )
 
-            if 'ID="rhel"' not in os_release_content:
-                # Enable CRB repository for Rocky/CentOS
-                self.run_command([self.os_info.package_manager, "-y", "config-manager", "--set-enabled", "crb"], timeout=300)
-                self.install_package("epel-release")
-                self.run_command(["crb", "enable"], timeout=300)
-                self.logger.info("✓ CRB and EPEL repositories enabled")
+            # EPEL is required to obtain systemd-networkd on RHEL 9.
+            epel_url = "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
+            self.run_command([self.os_info.package_manager, "install", "-y", epel_url], timeout=300)
 
+            self.logger.info("✓ Repositories configured (CRB and EPEL)")
         except Exception as e:
             self.logger.warning(f"Repository setup: {e}")
 
@@ -599,6 +613,7 @@ class RHELNodeInitializer(BaseNodeInitializer):
         packages = [
             "jq",
             "systemd-container",
+            "systemd-networkd",
             "systemd-resolved",
             "unzip"
         ]
@@ -697,6 +712,14 @@ kernel.io_uring_disabled = 0
             except Exception as e:
                 self.logger.warning(f"{service_name} configuration: {e}")
 
+        # Ensure the guest agent is running after NetworkManager removal/masking
+        try:
+            self.run_command(["systemctl", "enable", "--now", "google-guest-agent"], check=False)
+            self.run_command(["systemctl", "restart", "google-guest-agent"], check=False)
+            self.logger.info("✓ Google Guest Agent running post-NetworkManager removal")
+        except Exception as e:
+            self.logger.warning(f"Google Guest Agent post-NetworkManager restart: {e}")
+
     def apply_system_settings(self):
         """Apply all system configuration changes"""
         try:
@@ -721,6 +744,55 @@ kernel.io_uring_disabled = 0
         # Use longer timeout for package installation (10 minutes)
         self.run_command([self.os_info.package_manager, "install", "-y", package_file], timeout=600)
 
+
+
+
+    def configure_google_guest_agent(self):
+        """Disable Google Guest Agent network management and restart it to apply."""
+        self.logger.info("Configuring Google Guest Agent...")
+        try:
+            config_path = Path("/etc/default/instance_configs.cfg")
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # setup = false prevents post-boot rollback of networking config
+            config_content = "\n[NetworkInterfaces]\nsetup = false\n"
+            with open(config_path, "a") as f:
+                f.write(config_content)
+
+            # Restart so it stands down immediately
+            self.run_command(["systemctl", "restart", "google-guest-agent"], check=False)
+            self.logger.info("✓ Google Guest Agent configured")
+        except Exception as e:
+            self.logger.warning(f"Guest Agent configuration: {e}")
+
+    def configure_networkd_client_id(self):
+        """Force DHCP ClientIdentifier=mac for GCP renewals and start networkd live."""
+        self.logger.info("Configuring systemd-networkd DHCP client identifier...")
+        try:
+            network_dir = Path("/etc/systemd/network")
+            network_dir.mkdir(parents=True, exist_ok=True)
+
+            network_config = """[Match]
+Name=qumulo-frontend1
+
+[Network]
+DHCP=yes
+
+[DHCPv4]
+ClientIdentifier=mac
+"""
+            (network_dir / "10-gcp-eth.network").write_text(network_config)
+
+            # Live handoff
+            self.run_command(["systemctl", "enable", "--now", "systemd-networkd"])
+            self.run_command(["systemctl", "enable", "--now", "systemd-resolved"])
+
+            # Minimal line to fix DNS:
+            self.run_command(["ln", "-sf", "/run/systemd/resolve/stub-resolv.conf", "/etc/resolv.conf"], check=False)
+            
+            self.logger.info("✓ systemd-networkd configured for ClientIdentifier=mac")
+        except Exception as e:
+            self.logger.warning(f"systemd-networkd configuration: {e}")
 
 class OSDetector:
     """Utility class for operating system detection"""
