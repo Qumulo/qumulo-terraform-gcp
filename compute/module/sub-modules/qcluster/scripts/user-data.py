@@ -33,6 +33,7 @@ MAX_RETRIES = 5
 RETRY_DELAY = 10
 CONNECTIVITY_TIMEOUT = 30
 
+
 class OSInfo:
     """Container for operating system information"""
 
@@ -57,17 +58,14 @@ class BaseNodeInitializer(ABC):
         """Configure logging to both file and console"""
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(LOG_FILE),
-                logging.StreamHandler(sys.stdout)
-            ]
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler(sys.stdout)],
         )
 
     def run_command(self, cmd, env=os.environ, check=True, timeout=60):
         """Execute a shell command with comprehensive error handling"""
         try:
-            cmd_str = ' '.join(cmd) if isinstance(cmd, list) else cmd
+            cmd_str = " ".join(cmd) if isinstance(cmd, list) else cmd
             self.logger.info(f"Running command: {cmd_str}")
 
             if isinstance(cmd, str):
@@ -79,7 +77,7 @@ class BaseNodeInitializer(ABC):
                 text=True,
                 timeout=timeout,
                 check=check,
-                env=env
+                env=env,
             )
 
             if result.stdout:
@@ -134,17 +132,28 @@ class BaseNodeInitializer(ABC):
             # Use curl with retry logic and proper timeouts
             # Place -o before the URL so the response body does not go to stdout
             cmd = [
-                "curl", "-sSL",
-                "-o", "/dev/null",
-                "-w", "%{http_code}\\n",
-                "--connect-timeout", "10",
-                "--retry", "3",
-                "--retry-delay", "5",
-                "--max-time", "60",
-                url
+                "curl",
+                "-sSL",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}\\n",
+                "--connect-timeout",
+                "10",
+                "--retry",
+                "3",
+                "--retry-delay",
+                "5",
+                "--max-time",
+                "60",
+                url,
             ]
             result = self.run_command(cmd, timeout=70, check=False)
-            return result.stdout.strip() == "200"
+
+            # Verify result exists and has stdout before processing
+            if result and hasattr(result, "stdout") and result.stdout:
+                return result.stdout.strip() == "200"
+            return False
         except Exception as e:
             self.logger.warning(f"URL check failed for {url}: {e}")
             return False
@@ -159,7 +168,7 @@ class BaseNodeInitializer(ABC):
         if not self.chkurl(googleapis_url, "Google APIs"):
             self.logger.error("Google APIs unreachable after retries")
             raise RuntimeError("Google APIs connectivity check failed")
-        self.logger.info("✓ Google APIs reachable")
+        self.logger.info("Google APIs reachable")
 
         # Test internet connectivity
         microsoft_url = "https://microsoft.com/"
@@ -177,7 +186,7 @@ class BaseNodeInitializer(ABC):
             result = self.run_command(["gcloud", "--version"])
             self.logger.info("✓ GCP CLI available")
             self.logger.debug(f"gcloud version: {result.stdout.strip()}")
-        except Exception as e:
+        except Exception:
             self.logger.error("GCP CLI not available!")
             raise RuntimeError("Google Cloud CLI is required but not available")
 
@@ -196,20 +205,23 @@ class BaseNodeInitializer(ABC):
             try:
                 # Use curl to get MAC address from metadata service
                 cmd = [
-                    "curl", "-sL",
-                    "-H", "Metadata-Flavor: Google",
-                    "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac"
+                    "curl",
+                    "-sL",
+                    "-H",
+                    "Metadata-Flavor: Google",
+                    "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/mac",
                 ]
                 result = self.run_command(cmd)
                 return result.stdout.strip()
             except Exception as e:
-                self.logger.error(f"Failed to get MAC address from metadata service: {e}")
+                self.logger.error(
+                    f"Failed to get MAC address from metadata service: {e}"
+                )
                 raise RuntimeError("Failed to get MAC address from metadata service")
 
         try:
             mac_address = get_mac_address_from_metadata_service()
-            link_content = f"""
-[Match]
+            link_content = f"""[Match]
 MACAddress={mac_address}
 
 [Link]
@@ -236,10 +248,13 @@ AlternativeName=qumulo-frontend1
             result = self.run_command(["lsblk", "-J"])
             lsblk_data = json.loads(result.stdout)
 
-            disk_count = len([
-                device for device in lsblk_data.get("blockdevices", [])
-                if device.get("type") == "disk"
-            ])
+            disk_count = len(
+                [
+                    device
+                    for device in lsblk_data.get("blockdevices", [])
+                    if device.get("type") == "disk"
+                ]
+            )
 
             self.logger.debug(f"Found {disk_count} block devices")
             return disk_count
@@ -258,7 +273,9 @@ AlternativeName=qumulo-frontend1
                 self.logger.info(f"✓ All {expected_count} block devices found")
                 break
 
-            self.logger.info(f"Waiting for block devices: found {current_count}, expecting {expected_count}")
+            self.logger.info(
+                f"Waiting for block devices: found {current_count}, expecting {expected_count}"
+            )
             time.sleep(1)
 
     def download_qumulo_package(self, package_url):
@@ -272,10 +289,28 @@ AlternativeName=qumulo-frontend1
             download_timeout = 900
 
             if package_url.startswith("gs://"):
-                self.run_command(["gcloud", "storage", "cp", package_url, package_file], timeout=download_timeout)
+                self.run_command(
+                    ["gcloud", "storage", "cp", package_url, package_file],
+                    timeout=download_timeout,
+                )
             else:
                 # Add retry options for HTTP downloads
-                self.run_command(["curl", package_url, "-L", "-o", package_file, "--silent", "--show-error", "--retry", "3", "--retry-delay", "5"], timeout=download_timeout)
+                self.run_command(
+                    [
+                        "curl",
+                        package_url,
+                        "-L",
+                        "-o",
+                        package_file,
+                        "--silent",
+                        "--show-error",
+                        "--retry",
+                        "3",
+                        "--retry-delay",
+                        "5",
+                    ],
+                    timeout=download_timeout,
+                )
 
             self.logger.info("✓ Qumulo package downloaded")
             return package_file
@@ -306,47 +341,35 @@ AlternativeName=qumulo-frontend1
         """Execute the complete node initialization process"""
         try:
             self.logger.info("=== Starting Qumulo cluster node initialization ===")
-            self.logger.info(f"OS: {self.os_info.os_id} {self.os_info.version_id}")
-            self.logger.info(f"Package manager: {self.os_info.package_manager}")
-
-            # Check if first boot
-            if not self.check_first_boot():
+            if not self.check_first_boot(): 
                 return
-
-            # Change to root directory
             os.chdir("/root")
-            self.logger.info("Working directory: /root")
 
-            # Execute initialization steps
+            # 1. Silence Agent IMMEDIATELY to prevent rollback conflict
+            if self.os_info.is_rhel_based:
+                self.configure_google_guest_agent()
+
+            # 2. Package installation
             self.check_connectivity()
             self.uninstall_undesired_packages()
             self.install_required_packages()
+
+            # 3. Rename interface FIRST so the name 'qumulo-frontend1' exists
+            self.enable_frontend_interface_service()
+
+            # 4. Configure network identity and start the service LIVE
+            if self.os_info.is_rhel_based:
+                self.configure_networkd_client_id()
+
+            # 5. Finalize system services (removes NetworkManager)
             self.configure_system_services()
             self.verify_gcloud_cli()
 
-            # Enable frontend interface tagging service for floating IPs support
-            self.enable_frontend_interface_service()
-
-            # Install Qumulo Core if requested
             if install_qumulo_package == "true":
-                self.logger.info("Installing Qumulo Core...")
-
-                # Validate required parameters
-                if not qumulo_package_url or total_disk_count is None:
-                    error_msg = f"Missing required parameters: qumulo_package_url='{qumulo_package_url}', total_disk_count='{total_disk_count}'"
-                    self.logger.error(f"✗ {error_msg}")
-                    raise ValueError(f"qumulo_package_url and total_disk_count required when install_qumulo_package=true. {error_msg}")
-
                 self.install_qumulo_core(qumulo_package_url, int(total_disk_count))
-            else:
-                self.logger.info(f"Skipping Qumulo package installation (install_qumulo_package='{install_qumulo_package}')")
-                if install_qumulo_package.startswith("${"):
-                    self.logger.error("WARNING: Template variable was not substituted by terraform!")
 
-            # Mark completion
             self.mark_first_boot_complete()
-            self.logger.info("=== Qumulo cluster node initialization completed successfully ===")
-
+            self.logger.info("=== Initialization completed successfully ===")
         except Exception as e:
             self.logger.error(f"Initialization failed: {e}")
             raise
@@ -398,22 +421,30 @@ class DebianNodeInitializer(BaseNodeInitializer):
             return
 
         env_mod = os.environ.copy()
-        env_mod['DEBIAN_FRONTEND'] = 'noninteractive'
+        env_mod["DEBIAN_FRONTEND"] = "noninteractive"
 
         # Install with retry logic
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                self.logger.info(f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})")
-                self.run_command(["apt-get", "install", "-y", package_name], env=env_mod, timeout=300)
+                self.logger.info(
+                    f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})"
+                )
+                self.run_command(
+                    ["apt-get", "install", "-y", package_name], env=env_mod, timeout=300
+                )
                 self.logger.info(f"✓ {package_name} installed successfully")
                 return
 
             except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 if attempt == MAX_RETRIES:
-                    self.logger.error(f"Failed to install {package_name} after {MAX_RETRIES} attempts")
+                    self.logger.error(
+                        f"Failed to install {package_name} after {MAX_RETRIES} attempts"
+                    )
                     raise RuntimeError(f"Package installation failed: {package_name}")
 
-                self.logger.warning(f"Install attempt {attempt} failed, retrying in {RETRY_DELAY}s...")
+                self.logger.warning(
+                    f"Install attempt {attempt} failed, retrying in {RETRY_DELAY}s..."
+                )
                 time.sleep(RETRY_DELAY)
 
     def uninstall_package(self, package_name):
@@ -430,17 +461,23 @@ class DebianNodeInitializer(BaseNodeInitializer):
         # Uninstall with retry logic
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                self.logger.info(f"Uninstalling {package_name} (attempt {attempt}/{MAX_RETRIES})")
+                self.logger.info(
+                    f"Uninstalling {package_name} (attempt {attempt}/{MAX_RETRIES})"
+                )
                 self.run_command(["apt-get", "remove", "-y", package_name], timeout=300)
                 self.logger.info(f"✓ {package_name} uninstalled successfully")
                 return
 
             except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 if attempt == MAX_RETRIES:
-                    self.logger.error(f"Failed to uninstall {package_name} after {MAX_RETRIES} attempts")
+                    self.logger.error(
+                        f"Failed to uninstall {package_name} after {MAX_RETRIES} attempts"
+                    )
                     raise RuntimeError(f"Package removal failed: {package_name}")
 
-                self.logger.warning(f"Uninstall attempt {attempt} failed, retrying in {RETRY_DELAY}s...")
+                self.logger.warning(
+                    f"Uninstall attempt {attempt} failed, retrying in {RETRY_DELAY}s..."
+                )
                 time.sleep(RETRY_DELAY)
 
     def update_package_list(self):
@@ -472,7 +509,7 @@ class DebianNodeInitializer(BaseNodeInitializer):
             "unzip",
             "linux-tools-common",
             f"linux-tools-{kernel_release}",
-            "systemd-container"
+            "systemd-container",
         ]
 
         for package in packages:
@@ -489,12 +526,12 @@ class DebianNodeInitializer(BaseNodeInitializer):
         packages = [
             # We run chrony inside the container - there's no need to run a timesync service in
             # the host.
-            'chrony',
+            "chrony",
             # ubuntu-advantage-tools enables Ubuntu support features on cloud images. Not only do
             # we not need support features, these tools issue incorrectly formed requests to
             # instance metadata that are missing the Metadata-Flavor header, causing
             # crashes to appear in /var/crash if left enabled.
-            'ubuntu-advantage-tools',
+            "ubuntu-advantage-tools",
         ]
 
         for package in packages:
@@ -506,29 +543,28 @@ class DebianNodeInitializer(BaseNodeInitializer):
         """Configure system services for Debian/Ubuntu"""
         self.logger.info("Configuring system services for Debian/Ubuntu...")
 
-        # Disable systemd-timesyncd (needed on Debian, not always Ubuntu)
         try:
-            self.run_command(["systemctl", "stop", "systemd-timesyncd.service"], check=False)
-            self.run_command(["systemctl", "mask", "--now", "systemd-timesyncd"])
-            self.logger.info("✓ systemd-timesyncd disabled")
+            self.run_command(
+                ["systemctl", "mask", "--now", "systemd-timesyncd"], check=False
+            )
+            self.run_command(
+                [
+                    "ln",
+                    "-s",
+                    "/etc/apparmor.d/usr.sbin.chronyd",
+                    "/etc/apparmor.d/disable/",
+                ],
+                check=False,
+            )
+            self.run_command(
+                ["apparmor_parser", "-R", "/etc/apparmor.d/usr.sbin.chronyd"],
+                check=False,
+            )
+            self.run_command(
+                ["systemctl", "mask", "--now", "ubuntu-advantage"], check=False
+            )
         except Exception as e:
-            self.logger.warning(f"systemd-timesyncd configuration: {e}")
-
-        # Disable apparmor from preventing chrony execution in containers
-        try:
-            self.run_command(["ln", "-s", "/etc/apparmor.d/usr.sbin.chronyd", "/etc/apparmor.d/disable/"], check=False)
-            self.run_command(["apparmor_parser", "-R", "/etc/apparmor.d/usr.sbin.chronyd"], check=False)
-            self.logger.info("✓ apparmor chronyd profile removed")
-        except Exception as e:
-            raise RuntimeError('Failed to disable apparmor from preventing chrony execution in containers') from e
-
-        # Disable ubuntu-advantage to prevent it from generating core files
-        try:
-            self.run_command(["systemctl", "stop", "ubuntu-advantage.service"], check=False)
-            self.run_command(["systemctl", "mask", "--now", "ubuntu-advantage"])
-            self.logger.info("✓ ubuntu-advantage disabled")
-        except Exception as e:
-            raise RuntimeError('Failed to disable ubuntu-advantage') from e
+            self.logger.warning(f"Debian service configuration warning: {e}")
 
     def install_package_file(self, package_file):
         """Install a .deb package file"""
@@ -538,7 +574,7 @@ class DebianNodeInitializer(BaseNodeInitializer):
 
 
 class RHELNodeInitializer(BaseNodeInitializer):
-    """RHEL/Rocky/CentOS-specific node initializer"""
+    """RHEL/Rocky/CentOS-specific node initializer with GCP DHCP fixes."""
 
     def install_package(self, package_name):
         """Install a package via dnf/yum with retry logic"""
@@ -554,17 +590,26 @@ class RHELNodeInitializer(BaseNodeInitializer):
         # Install with retry logic
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                self.logger.info(f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})")
-                self.run_command([self.os_info.package_manager, "install", "-y", package_name], timeout=300)
+                self.logger.info(
+                    f"Installing {package_name} (attempt {attempt}/{MAX_RETRIES})"
+                )
+                self.run_command(
+                    [self.os_info.package_manager, "install", "-y", package_name],
+                    timeout=300,
+                )
                 self.logger.info(f"✓ {package_name} installed successfully")
                 return
 
             except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 if attempt == MAX_RETRIES:
-                    self.logger.error(f"Failed to install {package_name} after {MAX_RETRIES} attempts")
+                    self.logger.error(
+                        f"Failed to install {package_name} after {MAX_RETRIES} attempts"
+                    )
                     raise RuntimeError(f"Package installation failed: {package_name}")
 
-                self.logger.warning(f"Install attempt {attempt} failed, retrying in {RETRY_DELAY}s...")
+                self.logger.warning(
+                    f"Install attempt {attempt} failed, retrying in {RETRY_DELAY}s..."
+                )
                 time.sleep(RETRY_DELAY)
 
     def update_package_list(self):
@@ -572,23 +617,38 @@ class RHELNodeInitializer(BaseNodeInitializer):
         self.logger.info("Package list management handled automatically by dnf")
 
     def setup_repositories(self):
-        """Setup required repositories for RHEL/Rocky systems"""
+        """Setup required repositories for RHEL/Rocky systems."""
         self.logger.info("Setting up RHEL/Rocky repositories...")
 
-        # Check if this is RHEL (not Rocky/CentOS)
         try:
-            with open('/etc/os-release', 'r') as f:
-                os_release_content = f.read()
+            # 1. Attempt to enable CRB for both Rocky and GCP RHEL 9 names.
+            # Using check=False ensures the script proceeds even if one name is not found.
+            self.run_command(
+                [self.os_info.package_manager, "-y", "config-manager", "--set-enabled", "crb"],
+                check=False,
+            )
+            self.run_command(
+                [
+                    self.os_info.package_manager,
+                    "-y",
+                    "config-manager",
+                    "--set-enabled",
+                    "rhui-codeready-builder-for-rhel-9-x86_64-rhui-rpms",
+                ],
+                check=False,
+            )
 
-            if 'ID="rhel"' not in os_release_content:
-                # Enable CRB repository for Rocky/CentOS
-                self.run_command([self.os_info.package_manager, "-y", "config-manager", "--set-enabled", "crb"], timeout=300)
-                self.install_package("epel-release")
-                self.run_command(["crb", "enable"], timeout=300)
-                self.logger.info("✓ CRB and EPEL repositories enabled")
+            # 2. Install EPEL repository (Source for systemd-networkd on RHEL 9).
+            # Installing via URL is the most reliable method on GCP RHEL 9 images.
+            epel_url = "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
+            self.run_command(
+                [self.os_info.package_manager, "install", "-y", epel_url], timeout=300
+            )
+
+            self.logger.info("✓ Repositories configured (CRB and EPEL)")
 
         except Exception as e:
-            self.logger.warning(f"Repository setup: {e}")
+            self.logger.warning(f"Repository setup failed: {e}")
 
     def install_required_packages(self):
         """Install RHEL/Rocky required packages"""
@@ -599,8 +659,9 @@ class RHELNodeInitializer(BaseNodeInitializer):
         packages = [
             "jq",
             "systemd-container",
+            "systemd-networkd",  # This line is required for RHEL 9
             "systemd-resolved",
-            "unzip"
+            "unzip",
         ]
 
         for package in packages:
@@ -675,7 +736,11 @@ kernel.io_uring_disabled = 0
         """Remove and disable services that conflict with Qumulo"""
         # Remove NetworkManager package
         try:
-            self.run_command([self.os_info.package_manager, "-y", "remove", "NetworkManager"], check=False, timeout=300)
+            self.run_command(
+                [self.os_info.package_manager, "-y", "remove", "NetworkManager"],
+                check=False,
+                timeout=300,
+            )
             self.logger.info("✓ NetworkManager package removed")
         except Exception as e:
             self.logger.warning(f"NetworkManager removal: {e}")
@@ -686,13 +751,15 @@ kernel.io_uring_disabled = 0
             ("systemd-timesyncd", "systemd-timesyncd.service"),
             ("rpcbind", "rpcbind.service"),
             ("rpcbind.socket", "rpcbind.socket"),
-            ("firewalld", "firewalld.service")
+            ("firewalld", "firewalld.service"),
         ]
 
         for service_name, service_unit in services_to_disable:
             try:
                 self.run_command(["systemctl", "stop", service_unit], check=False)
-                self.run_command(["systemctl", "mask", "--now", service_unit], check=False)
+                self.run_command(
+                    ["systemctl", "mask", "--now", service_unit], check=False
+                )
                 self.logger.info(f"✓ {service_name} disabled")
             except Exception as e:
                 self.logger.warning(f"{service_name} configuration: {e}")
@@ -719,7 +786,51 @@ kernel.io_uring_disabled = 0
         """Install an .rpm package file"""
         self.logger.info("Installing Qumulo Core package...")
         # Use longer timeout for package installation (10 minutes)
-        self.run_command([self.os_info.package_manager, "install", "-y", package_file], timeout=600)
+        self.run_command(
+            [self.os_info.package_manager, "install", "-y", package_file], timeout=600
+        )
+
+    def configure_google_guest_agent(self):
+        """Disable Guest Agent network management."""
+        self.logger.info("Configuring Google Guest Agent...")
+        try:
+            config_path = Path("/etc/default/instance_configs.cfg")
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # setup = false prevents agent rollback of NetworkManager
+            config_content = "\n[NetworkInterfaces]\nsetup = false\n"
+            with open(config_path, "a") as f:
+                f.write(config_content)
+            
+        except Exception as e:
+            self.logger.warning(f"Guest Agent configuration failed: {e}")
+
+    def configure_networkd_client_id(self):
+        """Force MAC identifier for GCP compatibility and perform live stack handoff."""
+        self.logger.info("Configuring systemd-networkd for qumulo-frontend1...")
+        try:
+            network_config = """[Match]
+Name=qumulo-frontend1
+
+[Network]
+DHCP=yes
+
+[DHCPv4]
+ClientIdentifier=mac
+"""
+            Path("/etc/systemd/network/10-gcp-eth.network").write_text(network_config)
+            
+            # Use --now for a live stack handoff during script execution
+            self.run_command(["systemctl", "enable", "--now", "systemd-networkd"])
+            self.run_command(["systemctl", "enable", "--now", "systemd-resolved"])
+            
+            self.logger.info("✓ networkd/resolved started with ClientIdentifier=mac")
+
+            # FORCE RESTART so it stands down immediately
+            self.run_command(["systemctl", "restart", "google-guest-agent"])
+            self.logger.info("✓ Google Guest Agent restarted")
+        except Exception as e:
+            self.logger.warning(f"Networkd configuration failed: {e}")
 
 
 class OSDetector:
@@ -739,21 +850,21 @@ class OSDetector:
         """Detect operating system and return OSInfo object"""
         try:
             # Read /etc/os-release for system information
-            with open('/etc/os-release', 'r') as f:
+            with open("/etc/os-release", "r") as f:
                 os_release = {}
                 for line in f:
-                    if '=' in line:
-                        key, value = line.strip().split('=', 1)
+                    if "=" in line:
+                        key, value = line.strip().split("=", 1)
                         os_release[key] = value.strip('"')
 
-            os_id = os_release.get('ID', '').lower()
-            version_id = os_release.get('VERSION_ID', '')
+            os_id = os_release.get("ID", "").lower()
+            version_id = os_release.get("VERSION_ID", "")
 
             # Determine package manager and extension based on OS
-            if os_id in ['ubuntu', 'debian']:
+            if os_id in ["ubuntu", "debian"]:
                 package_manager = "apt"
                 package_ext = "deb"
-            elif os_id in ['rhel', 'rocky', 'centos', 'fedora']:
+            elif os_id in ["rhel", "rocky", "centos", "fedora"]:
                 package_manager = "dnf"
                 package_ext = "rpm"
             else:
@@ -787,7 +898,9 @@ class NodeInitializerFactory:
         elif os_info.is_rhel_based:
             return RHELNodeInitializer(os_info)
         else:
-            raise RuntimeError(f"Unsupported package manager: {os_info.package_manager}")
+            raise RuntimeError(
+                f"Unsupported package manager: {os_info.package_manager}"
+            )
 
 
 def main():
@@ -795,11 +908,8 @@ def main():
     # Set up early logging before anything else
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - USER-DATA - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(LOG_FILE),
-            logging.StreamHandler(sys.stdout)
-        ]
+        format="%(asctime)s - USER-DATA - %(levelname)s - %(message)s",
+        handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler(sys.stdout)],
     )
     logger = logging.getLogger(__name__)
 
@@ -808,7 +918,9 @@ def main():
     # Parse command line arguments (passed from bootstrap script)
     if len(sys.argv) < 4:
         logger.error("ERROR: Missing required arguments")
-        logger.error("Usage: user-data.py <install_qumulo_package> <qumulo_package_url> <total_disk_count>")
+        logger.error(
+            "Usage: user-data.py <install_qumulo_package> <qumulo_package_url> <total_disk_count>"
+        )
         logger.error(f"Received {len(sys.argv)} arguments: {sys.argv}")
         sys.exit(1)
 
@@ -819,7 +931,9 @@ def main():
     try:
         # Detect operating system
         os_info = OSDetector.detect_os()
-        logger.info(f"OS detected: {os_info.os_id} {os_info.version_id} ({os_info.package_manager})")
+        logger.info(
+            f"OS detected: {os_info.os_id} {os_info.version_id} ({os_info.package_manager})"
+        )
 
         # Create appropriate initializer
         initializer = NodeInitializerFactory.create_initializer(os_info)
@@ -827,8 +941,12 @@ def main():
         # Run initialization process
         initializer.run_initialization(
             install_qumulo_package=install_qumulo_package,
-            qumulo_package_url=qumulo_package_url if install_qumulo_package == "true" else None,
-            total_disk_count=total_disk_count if install_qumulo_package == "true" else None
+            qumulo_package_url=qumulo_package_url
+            if install_qumulo_package == "true"
+            else None,
+            total_disk_count=total_disk_count
+            if install_qumulo_package == "true"
+            else None,
         )
 
     except KeyboardInterrupt:
