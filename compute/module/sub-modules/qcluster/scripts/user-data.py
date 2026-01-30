@@ -159,24 +159,59 @@ class BaseNodeInitializer(ABC):
             return False
 
     def check_connectivity(self):
-        """Validate network connectivity to required services"""
-        self.logger.info("Checking network connectivity...")
+        """Validate network connectivity with an extended settling window for GCP routing."""
+        self.logger.info("Checking network connectivity (Waiting for stack/routes to settle)...")
 
-        # Test Google APIs connectivity
-        googleapis_url = "https://www.googleapis.com/discovery/v1/apis"
-        self.logger.info("Testing Google APIs connectivity...")
-        if not self.chkurl(googleapis_url, "Google APIs"):
-            self.logger.error("Google APIs unreachable after retries")
-            raise RuntimeError("Google APIs connectivity check failed")
-        self.logger.info("Google APIs reachable")
+        # We will try for a total of 120 seconds, checking every 10 seconds.
+        # This accounts for the 30-60s delay you observed manually.
+        max_settle_attempts = 12
+        settle_delay = 10
+        
+        urls_to_check = [
+            ("https://www.googleapis.com/discovery/v1/apis", "Google APIs"),
+            ("https://microsoft.com/", "Internet")
+        ]
 
-        # Test internet connectivity
-        microsoft_url = "https://microsoft.com/"
-        self.logger.info("Testing Internet connectivity...")
-        if not self.chkurl(microsoft_url, "Internet"):
-            self.logger.error("Internet unreachable after retries")
-            raise RuntimeError("Internet connectivity check failed")
-        self.logger.info("✓ Internet reachable")
+        for url, name in urls_to_check:
+            success = False
+            self.logger.info(f"Starting reachability test for {name}...")
+            
+            for attempt in range(1, max_settle_attempts + 1):
+                if self.chkurl(url, name):
+                    self.logger.info(f"✓ {name} is reachable.")
+                    success = True
+                    break
+                
+                if attempt < max_settle_attempts:
+                    self.logger.warning(
+                        f"{name} not reachable (Attempt {attempt}/{max_settle_attempts}). "
+                        f"External gateway may still be propagating. Waiting {settle_delay}s..."
+                    )
+                    time.sleep(settle_delay)
+            
+            if not success:
+                self.logger.error(f"FATAL: {name} remained unreachable after {max_settle_attempts * settle_delay}s.")
+                raise RuntimeError(f"Connectivity check failed for {name}")
+                
+#    def check_connectivity(self):
+#        """Validate network connectivity to required services"""
+#        self.logger.info("Checking network connectivity...")
+#
+#        # Test Google APIs connectivity
+#        googleapis_url = "https://www.googleapis.com/discovery/v1/apis"
+#        self.logger.info("Testing Google APIs connectivity...")
+#        if not self.chkurl(googleapis_url, "Google APIs"):
+#            self.logger.error("Google APIs unreachable after retries")
+#            raise RuntimeError("Google APIs connectivity check failed")
+#        self.logger.info("Google APIs reachable")
+#
+#        # Test internet connectivity
+#        microsoft_url = "https://microsoft.com/"
+#        self.logger.info("Testing Internet connectivity...")
+#        if not self.chkurl(microsoft_url, "Internet"):
+#            self.logger.error("Internet unreachable after retries")
+#            raise RuntimeError("Internet connectivity check failed")
+#        self.logger.info("✓ Internet reachable")
 
     def verify_gcloud_cli(self):
         """Verify Google Cloud CLI is available and functional"""
