@@ -152,7 +152,7 @@ class BaseNodeInitializer(ABC):
 
             # Verify result exists and has stdout before processing
             if result and hasattr(result, "stdout") and result.stdout:
-                return result.stdout.strip() == "200"
+                return result.stdout.strip().startswith("2")
             return False
         except Exception as e:
             self.logger.warning(f"URL check failed for {url}: {e}")
@@ -166,52 +166,32 @@ class BaseNodeInitializer(ABC):
         # This accounts for the 30-60s delay you observed manually.
         max_settle_attempts = 12
         settle_delay = 10
-        
+
         urls_to_check = [
             ("https://www.googleapis.com/discovery/v1/apis", "Google APIs"),
-            ("https://microsoft.com/", "Internet")
+            ("http://connectivitycheck.gstatic.com/generate_204", "Internet")
         ]
 
         for url, name in urls_to_check:
             success = False
             self.logger.info(f"Starting reachability test for {name}...")
-            
+
             for attempt in range(1, max_settle_attempts + 1):
                 if self.chkurl(url, name):
                     self.logger.info(f"✓ {name} is reachable.")
                     success = True
                     break
-                
+
                 if attempt < max_settle_attempts:
                     self.logger.warning(
                         f"{name} not reachable (Attempt {attempt}/{max_settle_attempts}). "
                         f"External gateway may still be propagating. Waiting {settle_delay}s..."
                     )
                     time.sleep(settle_delay)
-            
+
             if not success:
                 self.logger.error(f"FATAL: {name} remained unreachable after {max_settle_attempts * settle_delay}s.")
                 raise RuntimeError(f"Connectivity check failed for {name}")
-                
-#    def check_connectivity(self):
-#        """Validate network connectivity to required services"""
-#        self.logger.info("Checking network connectivity...")
-#
-#        # Test Google APIs connectivity
-#        googleapis_url = "https://www.googleapis.com/discovery/v1/apis"
-#        self.logger.info("Testing Google APIs connectivity...")
-#        if not self.chkurl(googleapis_url, "Google APIs"):
-#            self.logger.error("Google APIs unreachable after retries")
-#            raise RuntimeError("Google APIs connectivity check failed")
-#        self.logger.info("Google APIs reachable")
-#
-#        # Test internet connectivity
-#        microsoft_url = "https://microsoft.com/"
-#        self.logger.info("Testing Internet connectivity...")
-#        if not self.chkurl(microsoft_url, "Internet"):
-#            self.logger.error("Internet unreachable after retries")
-#            raise RuntimeError("Internet connectivity check failed")
-#        self.logger.info("✓ Internet reachable")
 
     def verify_gcloud_cli(self):
         """Verify Google Cloud CLI is available and functional"""
@@ -376,7 +356,7 @@ AlternativeName=qumulo-frontend1
         """Execute the complete node initialization process"""
         try:
             self.logger.info("=== Starting Qumulo cluster node initialization ===")
-            if not self.check_first_boot(): 
+            if not self.check_first_boot():
                 return
             os.chdir("/root")
 
@@ -831,12 +811,12 @@ kernel.io_uring_disabled = 0
         try:
             config_path = Path("/etc/default/instance_configs.cfg")
             config_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # setup = false prevents agent rollback of NetworkManager
             config_content = "\n[NetworkInterfaces]\nsetup = false\n"
             with open(config_path, "a") as f:
                 f.write(config_content)
-            
+
         except Exception as e:
             self.logger.warning(f"Guest Agent configuration failed: {e}")
 
@@ -854,11 +834,11 @@ DHCP=yes
 ClientIdentifier=mac
 """
             Path("/etc/systemd/network/10-gcp-eth.network").write_text(network_config)
-            
+
             # Use --now for a live stack handoff during script execution
             self.run_command(["systemctl", "enable", "--now", "systemd-networkd"])
             self.run_command(["systemctl", "enable", "--now", "systemd-resolved"])
-            
+
             self.logger.info("✓ networkd/resolved started with ClientIdentifier=mac")
 
             # FORCE RESTART so it stands down immediately
