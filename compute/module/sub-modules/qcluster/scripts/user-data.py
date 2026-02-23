@@ -100,6 +100,8 @@ class BaseNodeInitializer(ABC):
 
         except subprocess.TimeoutExpired as e:
             self.logger.error(f"Command timed out after {timeout}s")
+            self.logger.error(f"Partial stdout before timeout:\n{e.stdout}")
+            self.logger.error(f"Partial stderr before timeout:\n{e.stderr}")
             if check:
                 raise
             return e
