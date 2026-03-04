@@ -207,6 +207,7 @@ def run_command(cmd: str, timeout: Optional[int] = None, check: bool = True) -> 
     """
     Execute a shell command with proper error handling.
     """
+    logging.info(f"Running command: {cmd}")
     try:
         result = subprocess.run(
             cmd, shell=True, check=check, capture_output=True, text=True, timeout=timeout
@@ -248,7 +249,7 @@ def set_qfsd_log_level(qq_host: str, level: str) -> None:
 def chkurl(url: str, no_sec: bool = False) -> bool:
     """
     Check URL availability.
-    Returns True if URL is reachable (HTTP 200), False otherwise.
+    Returns True if URL is reachable (HTTP 2xx), False otherwise.
     """
     try:
         k = "k" if no_sec else ""
@@ -256,7 +257,7 @@ def chkurl(url: str, no_sec: bool = False) -> bool:
         # and use the correct -w format so curl prints the actual HTTP code.
         cmd = f'curl -sSL{k} -o /dev/null -w "%%{{http_code}}\\n" --connect-timeout 10 --retry 3 --retry-delay 5 --max-time 60 "{url}"'
         result = run_command(cmd, timeout=70, check=False)
-        return result.stdout.strip() == "200"
+        return result.stdout.strip().startswith("2")
     except Exception:
         return False
 
@@ -484,7 +485,7 @@ def validate_connectivity(firestore: FirestoreManager) -> None:
     time.sleep(2)
 
     # Check to make sure the internet is reachable
-    if chkurl("https://microsoft.com"):
+    if chkurl("http://connectivitycheck.gstatic.com/generate_204"):
         firestore.update_status("BOOTED. Internet up.")
     else:
         firestore.update_status("BOOTED. Internet NOT reachable. NAT or VPC endpoints are required.")
