@@ -498,10 +498,27 @@ class DebianNodeInitializer(BaseNodeInitializer):
                 time.sleep(RETRY_DELAY)
 
     def update_package_list(self):
-        """Update apt package list"""
-        self.logger.info("Updating package list...")
-        self.run_command(["apt-get", "update"], timeout=300)
-        self.logger.info("✓ Package list updated")
+        """Update apt package list with retry logic"""
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                self.logger.info(
+                    f"Updating package list (attempt {attempt}/{MAX_RETRIES})..."
+                )
+                self.run_command(["apt-get", "update"], timeout=300)
+                self.logger.info("✓ Package list updated")
+                return
+
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                if attempt == MAX_RETRIES:
+                    self.logger.error(
+                        f"Failed to update package list after {MAX_RETRIES} attempts"
+                    )
+                    raise RuntimeError("Package list update failed")
+
+                self.logger.warning(
+                    f"Update attempt {attempt} failed, retrying in {RETRY_DELAY}s..."
+                )
+                time.sleep(RETRY_DELAY)
 
     def get_kernel_release(self):
         """Get kernel release for linux-tools installation"""
