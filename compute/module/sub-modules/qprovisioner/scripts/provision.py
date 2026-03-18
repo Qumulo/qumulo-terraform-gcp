@@ -261,7 +261,7 @@ def chkurl(url: str, no_sec: bool = False) -> bool:
 
 def getqq(ip: str, file_name: str) -> None:
     """Download qq client from specified IP"""
-    cmd = f'wget --quiet --no-check-certificate -O "{file_name}" "https://{ip}/static/qq"'
+    cmd = f'wget --quiet --no-check-certificate --tries=5 --waitretry=5 --retry-connrefused -O "{file_name}" "https://{ip}/static/qq"'
     run_command(cmd)
     cmd = f'chmod 777 "./{file_name}"'
     run_command(cmd)
