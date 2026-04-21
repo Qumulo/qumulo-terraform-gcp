@@ -37,12 +37,17 @@ import logging
 import os
 import re
 import subprocess
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 import urllib.request
 import urllib.error
+
+
+MAX_RETRIES = 5
+RETRY_DELAY = 10
 
 
 @dataclass
@@ -205,26 +210,58 @@ class ProvisioningError(Exception):
 
 def run_command(cmd: str, timeout: Optional[int] = None, check: bool = True) -> subprocess.CompletedProcess:
     """
-    Execute a shell command with proper error handling.
+    Execute a shell command, streaming stdout and stderr line-by-line to the
+    logger so progress is visible during long-running commands (e.g.,
+    apt-get update). Full captured output is also returned in the
+    CompletedProcess for callers that parse it.
     """
     logging.info(f"Running command: {cmd}")
+    process = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
+
+    stdout_chunks: List[str] = []
+    stderr_chunks: List[str] = []
+
+    def _drain(stream, chunks: List[str], log_fn) -> None:
+        for line in iter(stream.readline, ""):
+            chunks.append(line)
+            line_stripped = line.rstrip()
+            if line_stripped:
+                log_fn(line_stripped)
+        stream.close()
+
+    stdout_thread = threading.Thread(
+        target=_drain, args=(process.stdout, stdout_chunks, logging.info)
+    )
+    stderr_thread = threading.Thread(
+        target=_drain, args=(process.stderr, stderr_chunks, logging.error)
+    )
+    stdout_thread.start()
+    stderr_thread.start()
+
     try:
-        result = subprocess.run(
-            cmd, shell=True, check=check, capture_output=True, text=True, timeout=timeout
-        )
-        if result.stdout.strip():
-            logging.info(result.stdout.strip())
-        if result.stderr.strip():
-            logging.error(result.stderr.strip())
-        return result
-    except subprocess.CalledProcessError as e:
+        returncode = process.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        stdout_thread.join()
+        stderr_thread.join()
+        raise
+
+    stdout_thread.join()
+    stderr_thread.join()
+
+    stdout = "".join(stdout_chunks)
+    stderr = "".join(stderr_chunks)
+    result = subprocess.CompletedProcess(cmd, returncode, stdout=stdout, stderr=stderr)
+
+    if check and returncode != 0:
         logging.error(f"Command failed: {cmd}")
-        if e.stdout and e.stdout.strip():
-            logging.info(e.stdout.strip())
-        if e.stderr and e.stderr.strip():
-            logging.error(e.stderr.strip())
-        error_msg = f"Command failed with exit code {e.returncode}: {cmd}"
-        raise ProvisioningError(error_msg) from e
+        error_msg = f"Command failed with exit code {returncode}: {cmd}"
+        raise ProvisioningError(error_msg)
+
+    return result
 
 
 def gcloud_command(args: str, timeout: int = 300) -> subprocess.CompletedProcess:
@@ -442,6 +479,28 @@ def apply_cluster_tunables(qq_host: str, refill_iops: int, refill_bps: int, disk
 ################################################################################
 
 
+def apt_get_update_with_retry() -> None:
+    """
+    Run apt-get update with retry on transient failures or timeouts. The
+    provisioner boots alongside the cluster nodes, so the package mirrors
+    can be briefly unreachable or slow; a handful of retries is almost
+    always sufficient.
+    """
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            logging.info(f"Updating package list (attempt {attempt}/{MAX_RETRIES})...")
+            run_command("apt-get update", timeout=300)
+            return
+        except (ProvisioningError, subprocess.TimeoutExpired):
+            if attempt == MAX_RETRIES:
+                logging.error(f"Failed to update package list after {MAX_RETRIES} attempts")
+                raise
+            logging.warning(
+                f"apt-get update attempt {attempt} failed, retrying in {RETRY_DELAY}s..."
+            )
+            time.sleep(RETRY_DELAY)
+
+
 def install_firestore_dependencies(config: ProvisioningConfig) -> None:
     """
     Install Python dependencies for Firestore operations.
@@ -451,7 +510,7 @@ def install_firestore_dependencies(config: ProvisioningConfig) -> None:
     functions_gcs_prefix = config.functions_gcs_prefix
 
     # Update system packages
-    run_command("apt-get update")
+    apt_get_update_with_retry()
 
     # Download and install Python Firestore utilities
     if not os.path.exists("install_vm_deps.sh"):
